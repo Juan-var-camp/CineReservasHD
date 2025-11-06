@@ -2,7 +2,7 @@ package model;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Sala {
+public class SalaDeprecated {
     private int id;
     private String nombre;
     private int nfilas;
@@ -10,7 +10,7 @@ public class Sala {
     private Asiento[][] asientos;
     private Map<Integer, Character> numerosALetras = new HashMap<>();
 
-    public Sala(int id, String nombre, int nfilas, int ncolumnas) {
+    public SalaDeprecated(int id, String nombre, int nfilas, int ncolumnas) {
         this.id = id;
         this.nombre = nombre;
         this.nfilas = nfilas;
@@ -37,7 +37,7 @@ public class Sala {
     
     public void desactivarAsiento(int fila, int columna){
         if (fila < 0 || fila >= nfilas || columna < 0 || columna >= ncolumnas) {
-            System.out.println("⚠️ Posición fuera de rango.");
+            System.out.println("Posición fuera de rango.");
             return;
         }
         

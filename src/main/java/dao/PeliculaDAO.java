@@ -18,7 +18,10 @@ public class PeliculaDAO {
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 titulo TEXT NOT NULL,
                 genero TEXT NOT NULL,
-                duracion INTEGER NOT NULL
+                duracion INTEGER NOT NULL,
+                clasificacion TEXT,
+                sipnosis TEXT,
+                imagen_path TEXT
             );
         """;
         try (Statement stmt = conn.createStatement()) {
@@ -27,11 +30,14 @@ public class PeliculaDAO {
     }
 
     public void insertar(Pelicula p) throws SQLException {
-        String sql = "INSERT INTO peliculas (titulo, genero, duracion) VALUES (?, ?, ?)";
+        String sql = "INSERT INTO peliculas (titulo, genero, duracion, clasificacion, sipnosis, imagen_path) VALUES (?, ?, ?, ?, ?, ?)";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, p.getTitulo());
             ps.setString(2, p.getGenero());
             ps.setInt(3, p.getDuracion());
+            ps.setString(4, p.getClasificacion());
+            ps.setString(5, p.getSipnosis());
+            ps.setString(6, p.getImagenPath());
             ps.executeUpdate();
         }
     }
@@ -48,7 +54,8 @@ public class PeliculaDAO {
                     rs.getString("genero"),
                     rs.getInt("duracion"),
                     rs.getString("clasificacion"),
-                    rs.getString("sipnosis")    
+                    rs.getString("sipnosis"),
+                    rs.getString("imagen_path")
                 ));
             }
         }
@@ -56,12 +63,15 @@ public class PeliculaDAO {
     }
 
     public void actualizar(Pelicula p) throws SQLException {
-        String sql = "UPDATE peliculas SET titulo=?, genero=?, duracion=? WHERE id=?";
+        String sql = "UPDATE peliculas SET titulo=?, genero=?, duracion=?, clasificacion=?, sipnosis=?, imagen_path=? WHERE id=?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, p.getTitulo());
             ps.setString(2, p.getGenero());
             ps.setInt(3, p.getDuracion());
-            ps.setInt(4, p.getId());
+            ps.setString(4, p.getClasificacion());
+            ps.setString(5, p.getSipnosis());
+            ps.setString(6, p.getImagenPath());
+            ps.setInt(7, p.getId());
             ps.executeUpdate();
         }
     }
@@ -72,5 +82,26 @@ public class PeliculaDAO {
             ps.setInt(1, id);
             ps.executeUpdate();
         }
+    }
+
+    // Método adicional para buscar película por ID
+    public Pelicula buscarPorId(int id) throws SQLException {
+        String sql = "SELECT * FROM peliculas WHERE id = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return new Pelicula(
+                    rs.getInt("id"),
+                    rs.getString("titulo"),
+                    rs.getString("genero"),
+                    rs.getInt("duracion"),
+                    rs.getString("clasificacion"),
+                    rs.getString("sipnosis"),
+                    rs.getString("imagen_path")
+                );
+            }
+        }
+        return null;
     }
 }

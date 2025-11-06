@@ -4,10 +4,10 @@ import java.time.LocalDateTime; // Clase recomendada para fechas y horas
 
 public class Funcion {
     private Pelicula pelicula;
-    private Sala sala;
+    private SalaDeprecated sala;
     private LocalDateTime horario; 
 
-    public Funcion(Pelicula pelicula, Sala sala, LocalDateTime horario) {
+    public Funcion(Pelicula pelicula, SalaDeprecated sala, LocalDateTime horario) {
         this.pelicula = pelicula;
         this.sala = sala;
         this.horario = horario;
@@ -17,7 +17,7 @@ public class Funcion {
         return pelicula;
     }
 
-    public Sala getSala() {
+    public SalaDeprecated getSala() {
         return sala;
     }
 
@@ -29,7 +29,7 @@ public class Funcion {
         this.pelicula = pelicula;
     }
 
-    public void setSala(Sala sala) {
+    public void setSala(SalaDeprecated sala) {
         this.sala = sala;
     }
 

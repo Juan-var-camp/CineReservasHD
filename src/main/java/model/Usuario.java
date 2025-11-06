@@ -4,6 +4,7 @@ public class Usuario {
     private String username;
     private String password;
     private String nombre;
+    private String tipo;
 
     public Usuario() {}
     
@@ -36,4 +37,14 @@ public class Usuario {
     public void setNombre(String nombre) {
         this.nombre = nombre;
     }
+
+    public String getTipo() {
+        return tipo;
+    }
+
+    public void setTipo(String tipo) {
+        this.tipo = tipo;
+    }
+    
+    
 }

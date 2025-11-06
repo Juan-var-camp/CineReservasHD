@@ -8,21 +8,33 @@ import java.sql.Statement;
 public class ConexionDB {
 
     private static final String URL = "jdbc:sqlite:src/cinereservas.db";
-    private static Connection connection;
+    private static Connection connection = null;
 
-    public static Connection conectar() throws SQLException {
+    public static Connection conectar() {
         try {
-            Connection conn = DriverManager.getConnection(URL);
-            System.out.println("Conexión establecida con SQLite");
-            return conn;
+            if (connection == null || connection.isClosed()) {
+                connection = DriverManager.getConnection(URL);
+                System.out.println("Conexión establecida con SQLite");
+            }
         } catch (SQLException e) {
             System.err.println("Error al conectar a la base de datos: " + e.getMessage());
-            throw e;
         }
+        return connection;
     }
     
+    public static void cerrarConexion() {
+        try {
+            if (connection != null && !connection.isClosed()) {
+                connection.close();
+                System.out.println("Conexión cerrada");
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al cerrar la conexión: " + e.getMessage());
+        }
+    }
+
     public static void inicializarDatabase() {
-        try (Connection conn = conectar(); Statement stmt = conn.createStatement()) {
+        try (Statement stmt = conectar().createStatement()) {
 
             String sqlPelicula = """
                 CREATE TABLE IF NOT EXISTS peliculas (
@@ -31,15 +43,18 @@ public class ConexionDB {
                     genero TEXT,
                     duracion INTEGER,
                     clasificacion TEXT,
-                    sipnosis TEXT
+                    sipnosis TEXT,
+                    imagen_path TEXT             
                 );
             """;
 
             String sqlSala = """
                 CREATE TABLE IF NOT EXISTS salas (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    nombre TEXT NOT NULL,
-                    capacidad INTEGER NOT NULL
+                    nombre TEXT NOT NULL UNIQUE,
+                    filas INTEGER NOT NULL,
+                    columnas INTEGER NOT NULL,
+                    sillas TEXT NOT NULL         
                 );
             """;
 
@@ -51,8 +66,8 @@ public class ConexionDB {
                     fecha TEXT,
                     hora TEXT,
                     precio REAL,
-                    FOREIGN KEY (id_pelicula) REFERENCES pelicula(id),
-                    FOREIGN KEY (id_sala) REFERENCES sala(id)
+                    FOREIGN KEY (id_pelicula) REFERENCES peliculas(id),
+                    FOREIGN KEY (id_sala) REFERENCES salas(id)
                 );
             """;
 
@@ -74,8 +89,8 @@ public class ConexionDB {
                     cantidad INTEGER,
                     total REAL,
                     fecha_reserva TEXT,
-                    FOREIGN KEY (id_funcion) REFERENCES funcion(id),
-                    FOREIGN KEY (id_usuario) REFERENCES usuario(id)
+                    FOREIGN KEY (id_funcion) REFERENCES funciones(id),
+                    FOREIGN KEY (id_usuario) REFERENCES usuarios(id)
                 );
             """;
 
@@ -90,5 +105,5 @@ public class ConexionDB {
         } catch (SQLException e) {
             System.err.println("Error al inicializar la base de datos: " + e.getMessage());
         }
-    }    
+    }
 }
