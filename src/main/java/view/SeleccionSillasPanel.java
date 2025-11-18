@@ -6,189 +6,205 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class SeleccionSillasPanel extends JPanel {
+    
+    //Constantes para los colores
+    private static final Color COLOR_DISPONIBLE = new Color(144, 238, 144); // Verde claro
+    private static final Color COLOR_SELECCIONADA = new Color(65, 105, 225); // Azul rey
+    private static final Color COLOR_OCUPADA = new Color(220, 20, 60);    // Rojo carmesí
+    
+    private final ControladorSeleccionSillas controlador;
+    private final Set<SeatButton> sillasSeleccionadas;
+    private final Component[][] componentesSillas;
+    private final int filas;
+    private final int columnas;
+    private final double precioPorSilla;
 
-    private JPanel panelPrincipal;
-    private JPanel panelPantalla;
-    private JPanel panelSillas;
-    private JPanel panelInfo;
-    private JLabel lblPantalla;
     private JLabel lblInfo;
-    private JButton btnConfirmar;
-    private Set<String> sillasSeleccionadas;
-    private JButton[][] botonesSillas;
-    private int filas;
-    private int columnas;
-    private ControladorSeleccionSillas controlador;
-
-    public SeleccionSillasPanel(Sala sala, ControladorSeleccionSillas controlador) {
+    
+    public SeleccionSillasPanel(String nombreSala, int idFuncion, double precio) {
+        this.controlador = new ControladorSeleccionSillas(nombreSala, idFuncion, precio);
+        this.precioPorSilla = precio;
         
-        this.filas = sala.getFilas();
-        this.columnas = sala.getColumnas();
-        this.controlador = controlador;
+        Sala salaActual = controlador.getControladorSala().getSalaActual();
+        this.filas = salaActual.getFilas();
+        this.columnas = salaActual.getColumnas();
         this.sillasSeleccionadas = new HashSet<>();
+        this.componentesSillas = new Component[filas][columnas];
 
-        inicializarComponentes(sala);
-        configurarPanel();
+        initComponents(salaActual);
     }
 
-    private void inicializarComponentes(Sala sala) {
-        setLayout(new BorderLayout());
-        setBackground(new Color(240, 240, 240));
-
-        panelPrincipal = new JPanel(new BorderLayout(10, 10));
-        panelPrincipal.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
-        panelPrincipal.setBackground(new Color(240, 240, 240));
+    private void initComponents(Sala sala) {
+        setLayout(new BorderLayout(10, 10));
+        setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
+        setBackground(new Color(240, 248, 255));
 
         // --- Panel superior: Pantalla ---
-        panelPantalla = new JPanel();
-        panelPantalla.setBackground(new Color(0, 0, 139));
-        panelPantalla.setPreferredSize(new Dimension(500, 60));
-        panelPantalla.setBorder(BorderFactory.createLineBorder(Color.GRAY, 2));
-
-        lblPantalla = new JLabel("Sala: " + sala.getNombre(), JLabel.CENTER);
+        JPanel panelPantalla = new JPanel();
+        panelPantalla.setBackground(new Color(25, 25, 112)); // Azul 
+        panelPantalla.setPreferredSize(new Dimension(0, 50));
+        
+        JLabel lblPantalla = new JLabel("PANTALLA", JLabel.CENTER);
         lblPantalla.setForeground(Color.WHITE);
-        lblPantalla.setFont(new Font("Arial", Font.BOLD, 18));
+        lblPantalla.setFont(new Font("Segoe UI", Font.BOLD, 18));
         panelPantalla.add(lblPantalla);
 
         // --- Panel central: Sillas ---
-        JPanel panelSillasCompleto = new JPanel(new BorderLayout());
-        panelSillasCompleto.setBackground(new Color(240, 240, 240));
-        panelSillasCompleto.setBorder(BorderFactory.createTitledBorder("Seleccione sus sillas"));
+        JPanel panelSillas = new JPanel(new GridLayout(filas, columnas, 5, 5));
+        panelSillas.setBackground(new Color(240, 248, 255));
+        panelSillas.setBorder(BorderFactory.createTitledBorder(
+            "Seleccione sus asientos - Sala: " + sala.getNombre()
+        ));
 
-        panelSillas = new JPanel(new GridLayout(filas, columnas, 5, 5));
-        panelSillas.setBackground(new Color(240, 240, 240));
-        botonesSillas = new JButton[filas][columnas];
-
-        boolean[][] estado = sala.getEstadoSillas();
         char letraFila = 'A';
-
         for (int i = 0; i < filas; i++) {
+            int contadorAsientosVisibles = 1;
             for (int j = 0; j < columnas; j++) {
-                String idSilla = letraFila + "" + (j + 1);
-                JButton btnSilla = createSeatButton(idSilla);
 
-                // Si la silla está deshabilitada en la sala, no se puede seleccionar
-                if (!estado[i][j]) {
-                    btnSilla.setEnabled(false);
-                    btnSilla.setBackground(Color.DARK_GRAY);
-                    btnSilla.setForeground(Color.WHITE);
-                    btnSilla.setToolTipText("Silla inactiva");
+                if (sala.isActiva(i, j)) {
+                    String idVisible = letraFila + "" + contadorAsientosVisibles;
+                    SeatButton btnSilla = new SeatButton(idVisible, i, j); 
+                    
+                    if (sala.isOcupada(i, j)) {
+                        btnSilla.setOcupada(true);
+                    } else {
+                        btnSilla.setOcupada(false); // Usar el nuevo método
+                        btnSilla.addActionListener(e -> {
+                            if (!btnSilla.isOcupada()) {
+                            toggleSillaSeleccionada(btnSilla);
+                            }
+                        });
+                    }
+                    
+                    componentesSillas[i][j] = btnSilla;
+                    panelSillas.add(btnSilla);
+                    contadorAsientosVisibles++; 
+
                 } else {
-                    btnSilla.addActionListener(e -> toggleSillaSeleccionada((JButton) e.getSource()));
+                    
+                    JPanel placeholder = new JPanel();
+                    placeholder.setOpaque(false); 
+                    componentesSillas[i][j] = placeholder;
+                    panelSillas.add(placeholder);
                 }
-
-                botonesSillas[i][j] = btnSilla;
-                panelSillas.add(btnSilla);
             }
             letraFila++;
         }
 
-        panelSillasCompleto.add(panelSillas, BorderLayout.CENTER);
-
         // --- Panel inferior: Información y confirmación ---
-        crearPanelInfo();
+        JPanel panelInfo = crearPanelInfo();
 
         // --- Ensamblar todo ---
-        panelPrincipal.add(panelPantalla, BorderLayout.NORTH);
-        panelPrincipal.add(panelSillasCompleto, BorderLayout.CENTER);
-        panelPrincipal.add(panelInfo, BorderLayout.SOUTH);
-
-        add(panelPrincipal, BorderLayout.CENTER);
+        add(panelPantalla, BorderLayout.NORTH);
+        add(panelSillas, BorderLayout.CENTER);
+        add(panelInfo, BorderLayout.SOUTH);
     }
 
-    private JButton createSeatButton(String idSilla) {
-        JButton btnSilla = new JButton(idSilla);
-        btnSilla.setPreferredSize(new Dimension(55, 55));
-        btnSilla.setBackground(new Color(144, 238, 144)); // Verde claro
-        btnSilla.setForeground(Color.BLACK);
-        btnSilla.setFont(new Font("Arial", Font.BOLD, 12));
-        btnSilla.setOpaque(true);
-        btnSilla.setBorderPainted(true);
-        btnSilla.setBorder(BorderFactory.createLineBorder(Color.DARK_GRAY, 2));
-        btnSilla.setFocusPainted(false);
-        btnSilla.setToolTipText("Silla " + idSilla + " - Click para seleccionar");
-        return btnSilla;
-    }
-
-    private void toggleSillaSeleccionada(JButton botonSilla) {
-        String idSilla = botonSilla.getText();
-
-        if (sillasSeleccionadas.contains(idSilla)) {
-            // Deseleccionar silla
-            sillasSeleccionadas.remove(idSilla);
-            botonSilla.setBackground(new Color(144, 238, 144)); // Verde claro
-            botonSilla.setForeground(Color.BLACK);
-            botonSilla.setToolTipText("Silla " + idSilla + " - Click para seleccionar");
-        } else {
-            // Seleccionar silla
-            sillasSeleccionadas.add(idSilla);
-            botonSilla.setBackground(new Color(220, 20, 60)); // Rojo
-            botonSilla.setForeground(Color.WHITE);
-            botonSilla.setToolTipText("Silla " + idSilla + " - Seleccionada (Click para deseleccionar)");
+    private void toggleSillaSeleccionada(SeatButton botonSilla) {
+        if (botonSilla.isOcupada()) {
+            return;
         }
-
+        
+        if (sillasSeleccionadas.contains(botonSilla)) {
+            sillasSeleccionadas.remove(botonSilla);
+            botonSilla.setBackground(COLOR_DISPONIBLE);
+        } else {
+            sillasSeleccionadas.add(botonSilla);
+            botonSilla.setBackground(COLOR_SELECCIONADA);
+        }
         actualizarInfo();
     }
 
-    private void crearPanelInfo() {
-        panelInfo = new JPanel(new BorderLayout(10, 10));
+    private JPanel crearPanelInfo() {
+        JPanel panelInfo = new JPanel(new BorderLayout(10, 10));
         panelInfo.setBorder(BorderFactory.createTitledBorder("Resumen de Selección"));
-        panelInfo.setBackground(new Color(240, 240, 240));
+        panelInfo.setBackground(new Color(240, 248, 255));
 
-        lblInfo = new JLabel("<html><div style='text-align: center;'>Seleccione las sillas haciendo clic en ellas</div></html>", JLabel.CENTER);
-        lblInfo.setFont(new Font("Arial", Font.PLAIN, 14));
+        lblInfo = new JLabel("Seleccione los asientos haciendo clic en ellos", JLabel.CENTER);
+        lblInfo.setFont(new Font("Segoe UI", Font.PLAIN, 14));
 
-        btnConfirmar = new JButton("Confirmar Selección");
-        btnConfirmar.setBackground(new Color(34, 139, 34));
+        JButton btnConfirmar = new JButton("Confirmar Reserva");
+        btnConfirmar.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        btnConfirmar.setBackground(new Color(46, 139, 87)); // Verde marino
         btnConfirmar.setForeground(Color.WHITE);
-        btnConfirmar.setFont(new Font("Arial", Font.BOLD, 14));
-        btnConfirmar.setFocusPainted(false);
-        btnConfirmar.addActionListener(e -> controlador.confirmarSeleccion(sillasSeleccionadas));
+        btnConfirmar.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        
+        JButton btnCancelar = new JButton("Cancelar"); // <-- NUEVO BOTÓN
+        btnCancelar.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        btnCancelar.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        
+        btnConfirmar.addActionListener(e -> confirmarSeleccion());
+        
+        btnCancelar.addActionListener(e -> { // <-- FUNCIONALIDAD DEL NUEVO BOTÓN
+            String mensaje = "¿Estás seguro de que quieres cancelar y volver a la cartelera?";
+            if (!sillasSeleccionadas.isEmpty()) {
+                mensaje += "\nPerderás los asientos que has seleccionado.";
+            }
+
+            int confirm = JOptionPane.showConfirmDialog(
+                this, 
+                mensaje, 
+                "Confirmar Cancelación", 
+                JOptionPane.YES_NO_OPTION
+            );
+            
+            if (confirm == JOptionPane.YES_OPTION) {
+                MainFrame.getInstancia().cambiarVista("cartelera");
+            }
+        });
+        
+        JPanel panelAcciones = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 5));
+        panelAcciones.setOpaque(false);
+        panelAcciones.add(btnCancelar); 
+        panelAcciones.add(btnConfirmar); 
 
         // Leyenda de colores
-        JPanel panelLeyenda = new JPanel(new FlowLayout());
-        panelLeyenda.setBackground(new Color(240, 240, 240));
-
-        JPanel muestraDisponible = crearMuestra(Color.GREEN.brighter(), "Disponible");
-        JPanel muestraSeleccionada = crearMuestra(Color.RED, "Seleccionada");
-        JPanel muestraInactiva = crearMuestra(Color.DARK_GRAY, "Inactiva");
-
-        panelLeyenda.add(muestraDisponible);
-        panelLeyenda.add(new JLabel("Disponible"));
-        panelLeyenda.add(Box.createHorizontalStrut(20));
-        panelLeyenda.add(muestraSeleccionada);
-        panelLeyenda.add(new JLabel("Seleccionada"));
-        panelLeyenda.add(Box.createHorizontalStrut(20));
-        panelLeyenda.add(muestraInactiva);
-        panelLeyenda.add(new JLabel("Inactiva"));
+        JPanel panelLeyenda = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 5));
+        panelLeyenda.setBackground(new Color(240, 248, 255));
+        panelLeyenda.add(crearMuestra(COLOR_DISPONIBLE, "Disponible"));
+        panelLeyenda.add(crearMuestra(COLOR_SELECCIONADA, "Seleccionado"));
+        panelLeyenda.add(crearMuestra(COLOR_OCUPADA, "Ocupado"));
 
         JPanel panelSur = new JPanel(new BorderLayout());
+        panelSur.setOpaque(false);
         panelSur.add(panelLeyenda, BorderLayout.NORTH);
-        panelSur.add(btnConfirmar, BorderLayout.SOUTH);
+        panelSur.add(panelAcciones, BorderLayout.SOUTH);
 
         panelInfo.add(lblInfo, BorderLayout.CENTER);
         panelInfo.add(panelSur, BorderLayout.SOUTH);
+        
+        return panelInfo;
     }
-
+    
     private JPanel crearMuestra(Color color, String texto) {
-        JPanel muestra = new JPanel();
+        JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
+        panel.setOpaque(false);
+        
+        JLabel muestra = new JLabel();
+        muestra.setOpaque(true);
         muestra.setPreferredSize(new Dimension(20, 20));
         muestra.setBackground(color);
         muestra.setBorder(BorderFactory.createLineBorder(Color.DARK_GRAY));
-        return muestra;
+        
+        panel.add(muestra);
+        panel.add(new JLabel(texto));
+        return panel;
     }
 
     private void actualizarInfo() {
         if (sillasSeleccionadas.isEmpty()) {
-            lblInfo.setText("<html><div style='text-align: center;'>Seleccione las sillas haciendo clic en ellas</div></html>");
+            lblInfo.setText("Seleccione los asientos haciendo clic en ellos");
         } else {
-            String sillasTexto = String.join(", ", sillasSeleccionadas);
-            lblInfo.setText("<html><div style='text-align: center;'>"
-                    + "<b>Sillas seleccionadas:</b><br>"
-                    + sillasTexto + "<br>"
-                    + "Total: " + sillasSeleccionadas.size() + " silla(s)</div></html>");
+            String sillasTexto = sillasSeleccionadas.stream()
+                .map(JButton::getText)
+                .sorted()
+                .collect(Collectors.joining(", "));
+            
+            double total = sillasSeleccionadas.size() * precioPorSilla;
+            lblInfo.setText(String.format("<html><b>Seleccionado:</b> %s<br><b>Total:</b> $%.2f</html>", sillasTexto, total));
         }
     }
     
@@ -199,23 +215,40 @@ public class SeleccionSillasPanel extends JPanel {
     public int preguntar(String pregunta, String titulo) {
         return JOptionPane.showConfirmDialog(this, pregunta, titulo, JOptionPane.YES_NO_OPTION);
     }
+    
+    private void confirmarSeleccion() {
+        if (sillasSeleccionadas.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Debe seleccionar al menos un asiento.", "Selección vacía", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        Set<Point> coordenadasReales = new HashSet<>();
+        for (SeatButton seatButton : sillasSeleccionadas) {
+            coordenadasReales.add(new Point(seatButton.getGridRow(), seatButton.getGridCol()));
+        }
+        
+        double total = sillasSeleccionadas.size() * precioPorSilla;
+        
+        JFrame mainFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
+        PagoDialog dialogoPago = new PagoDialog(mainFrame, total, coordenadasReales, controlador);
+        dialogoPago.setVisible(true);
+        
+        if (dialogoPago.isPagoExitoso()) {
+            actualizarSillasOcupadas();
+            resetearSeleccion();
+        } else {
+            System.out.println("El pago fue cancelado por el usuario.");
+        }
+    }
+    
+    private void actualizarSillasOcupadas() {
+        for (SeatButton btn : sillasSeleccionadas) {
+            btn.setOcupada(true); 
+        }
+    }
 
     public void resetearSeleccion() {
         sillasSeleccionadas.clear();
-        for (int i = 0; i < filas; i++) {
-            for (int j = 0; j < columnas; j++) {
-                JButton btn = botonesSillas[i][j];
-                if (btn.isEnabled()) {
-                    btn.setBackground(new Color(144, 238, 144));
-                    btn.setForeground(Color.BLACK);
-                    btn.setToolTipText("Silla " + btn.getText() + " - Click para seleccionar");
-                }
-            }
-        }
         actualizarInfo();
-    }
-
-    private void configurarPanel() {
-        setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
     }
 }

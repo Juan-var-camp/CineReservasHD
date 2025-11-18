@@ -20,6 +20,4 @@ public class Validador {
     public static boolean validarCamposObligatorios(List<String> campos,List<String> placeholders){
         return validarCamposObligatorios(campos, placeholders, "Todos los campos son obligatorios");
     }
-    
 }
-

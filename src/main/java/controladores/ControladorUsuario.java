@@ -4,11 +4,30 @@ import dao.UsuarioDAO;
 import model.Usuario;
 
 public class ControladorUsuario {
-    
+
+
+    private static ControladorUsuario instancia;
     private UsuarioDAO usuarioDAO;
+    private Usuario usuarioActual;
     
-    public ControladorUsuario() {
+    private ControladorUsuario() {
         usuarioDAO = new UsuarioDAO();
+    }
+
+    public Usuario getUsuarioActual() {
+        return usuarioActual;
+    }
+
+    public static synchronized ControladorUsuario getInstanciaControladorUsuario() {
+        if (instancia == null) {
+            instancia = new ControladorUsuario();
+        }
+        return instancia;
+    }
+    
+    public void cerrarSesion() {
+        this.usuarioActual = null;
+        System.out.println("Sesión cerrada.");
     }
     
     public boolean registrarUsuario(Usuario usuario) {
@@ -16,7 +35,8 @@ public class ControladorUsuario {
     }
 
     public Usuario iniciarSesion(String username, String password) {
-        
-        return usuarioDAO.login(username, password);
+        usuarioActual = usuarioDAO.login(username, password);
+        System.out.println(usuarioActual);
+        return usuarioActual;
     }
 }

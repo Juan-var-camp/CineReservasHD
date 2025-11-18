@@ -13,5 +13,4 @@ public class PagoPSE extends Pago {
         System.out.println("Procesando pago por PSE con el banco: " + this.banco);
         return true;
     }
-    
 }

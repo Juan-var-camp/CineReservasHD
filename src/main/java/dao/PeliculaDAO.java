@@ -6,11 +6,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class PeliculaDAO {
-    private Connection conn;
-
-    public PeliculaDAO(Connection conn) {
-        this.conn = conn;
-    }
+    
+    public PeliculaDAO() {    }
 
     public void crearTabla() throws SQLException {
         String sql = """
@@ -21,23 +18,28 @@ public class PeliculaDAO {
                 duracion INTEGER NOT NULL,
                 clasificacion TEXT,
                 sipnosis TEXT,
-                imagen_path TEXT
+                imagen_path TEXT,
+                puntaje REAL     
             );
         """;
-        try (Statement stmt = conn.createStatement()) {
+        
+        try (Connection conn = ConexionDB.conectar();
+                Statement stmt = conn.createStatement()){
             stmt.execute(sql);
         }
     }
 
     public void insertar(Pelicula p) throws SQLException {
-        String sql = "INSERT INTO peliculas (titulo, genero, duracion, clasificacion, sipnosis, imagen_path) VALUES (?, ?, ?, ?, ?, ?)";
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+        String sql = "INSERT INTO peliculas (titulo, genero, duracion, clasificacion, sipnosis, imagen_path, puntaje) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        try (Connection conn = ConexionDB.conectar();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, p.getTitulo());
             ps.setString(2, p.getGenero());
             ps.setInt(3, p.getDuracion());
             ps.setString(4, p.getClasificacion());
             ps.setString(5, p.getSipnosis());
             ps.setString(6, p.getImagenPath());
+            ps.setDouble(7, p.getPuntaje());
             ps.executeUpdate();
         }
     }
@@ -45,7 +47,8 @@ public class PeliculaDAO {
     public List<Pelicula> listar() throws SQLException {
         List<Pelicula> lista = new ArrayList<>();
         String sql = "SELECT * FROM peliculas";
-        try (Statement st = conn.createStatement();
+        try (Connection conn = ConexionDB.conectar();
+             Statement st = conn.createStatement();
              ResultSet rs = st.executeQuery(sql)) {
             while (rs.next()) {
                 lista.add(new Pelicula(
@@ -55,7 +58,8 @@ public class PeliculaDAO {
                     rs.getInt("duracion"),
                     rs.getString("clasificacion"),
                     rs.getString("sipnosis"),
-                    rs.getString("imagen_path")
+                    rs.getString("imagen_path"),
+                    rs.getDouble("puntaje")
                 ));
             }
         }
@@ -63,22 +67,26 @@ public class PeliculaDAO {
     }
 
     public void actualizar(Pelicula p) throws SQLException {
-        String sql = "UPDATE peliculas SET titulo=?, genero=?, duracion=?, clasificacion=?, sipnosis=?, imagen_path=? WHERE id=?";
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+        // CORRECCIÓN: Se añadió 'puntaje = ?' a la consulta
+        String sql = "UPDATE peliculas SET titulo=?, genero=?, duracion=?, clasificacion=?, sipnosis=?, imagen_path=?, puntaje=? WHERE id=?";
+        try (Connection conn = ConexionDB.conectar();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, p.getTitulo());
             ps.setString(2, p.getGenero());
             ps.setInt(3, p.getDuracion());
             ps.setString(4, p.getClasificacion());
             ps.setString(5, p.getSipnosis());
             ps.setString(6, p.getImagenPath());
-            ps.setInt(7, p.getId());
+            ps.setDouble(7, p.getPuntaje()); 
+            ps.setInt(8, p.getId());         
             ps.executeUpdate();
         }
     }
 
     public void eliminar(int id) throws SQLException {
         String sql = "DELETE FROM peliculas WHERE id=?";
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = ConexionDB.conectar();
+                PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, id);
             ps.executeUpdate();
         }
@@ -87,7 +95,8 @@ public class PeliculaDAO {
     // Método adicional para buscar película por ID
     public Pelicula buscarPorId(int id) throws SQLException {
         String sql = "SELECT * FROM peliculas WHERE id = ?";
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = ConexionDB.conectar();
+                PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, id);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
@@ -98,7 +107,8 @@ public class PeliculaDAO {
                     rs.getInt("duracion"),
                     rs.getString("clasificacion"),
                     rs.getString("sipnosis"),
-                    rs.getString("imagen_path")
+                    rs.getString("imagen_path"),
+                    rs.getDouble("puntaje")
                 );
             }
         }

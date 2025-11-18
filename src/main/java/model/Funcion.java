@@ -1,47 +1,84 @@
 package model;
 
-import java.time.LocalDateTime; // Clase recomendada para fechas y horas
-
 public class Funcion {
-    private Pelicula pelicula;
-    private SalaDeprecated sala;
-    private LocalDateTime horario; 
+    private int id;
+    private int idPelicula;
+    private int idSala;
+    private String fecha;
+    private String hora;
+    private double precio;
+    private String nombreSala;
 
-    public Funcion(Pelicula pelicula, SalaDeprecated sala, LocalDateTime horario) {
-        this.pelicula = pelicula;
-        this.sala = sala;
-        this.horario = horario;
+    public Funcion(int idPelicula, int idSala, String fecha, String hora, double precio) {
+        this.idPelicula = idPelicula;
+        this.idSala = idSala;
+        this.fecha = fecha;
+        this.hora = hora;
+        this.precio = precio;
     }
 
-    public Pelicula getPelicula() {
-        return pelicula;
+    public Funcion(int id, int idPelicula, int idSala, String fecha, String hora, double precio) {
+        this.id = id;
+        this.idPelicula = idPelicula;
+        this.idSala = idSala;
+        this.fecha = fecha;
+        this.hora = hora;
+        this.precio = precio;
     }
 
-    public SalaDeprecated getSala() {
-        return sala;
+    public int getId() {
+        return id;
     }
 
-    public LocalDateTime getHorario() {
-        return horario;
-    }
-    
-    public void setPelicula(Pelicula pelicula) {
-        this.pelicula = pelicula;
+    public void setId(int id) {
+        this.id = id;
     }
 
-    public void setSala(SalaDeprecated sala) {
-        this.sala = sala;
+    public int getIdPelicula() {
+        return idPelicula;
     }
 
-    public void setHorario(LocalDateTime horario) {
-        this.horario = horario;
+    public void setIdPelicula(int idPelicula) {
+        this.idPelicula = idPelicula;
     }
 
-    @Override
-    public String toString() {
-        return String.format("Película: %s, Sala: %s, Hora: %s", 
-                             pelicula.getTitulo(), 
-                             sala.getNombre(), 
-                             horario.toLocalTime().toString());
+    public int getIdSala() {
+        return idSala;
+    }
+
+    public void setIdSala(int idSala) {
+        this.idSala = idSala;
+    }
+
+    public String getFecha() {
+        return fecha;
+    }
+
+    public void setFecha(String fecha) {
+        this.fecha = fecha;
+    }
+
+    public String getHora() {
+        return hora;
+    }
+
+    public void setHora(String hora) {
+        this.hora = hora;
+    }
+
+    public double getPrecio() {
+        return precio;
+    }
+
+    public void setPrecio(double precio) {
+        this.precio = precio;
+    }
+
+    public String getNombreSala() {
+        return nombreSala;
+    }
+
+    public void setNombreSala(String nombreSala) {
+        this.nombreSala = nombreSala;
     }
 }

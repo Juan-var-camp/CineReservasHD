@@ -3,14 +3,12 @@ package view;
 import dao.PeliculaDAO;
 import model.Pelicula;
 import util.Validador;
-import dao.ConexionDB;
+import util.ImageManager;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.io.File;
 import java.sql.SQLException;
 import java.util.Arrays;
@@ -20,186 +18,109 @@ public class PanelPeliculas extends JPanel {
 
     private JTable tabla;
     private DefaultTableModel modelo;
-    private JTextField txtTitulo, txtGenero, txtDuracion;
+    // --- CAMPOS DEL FORMULARIO ---
+    private JTextField txtTitulo, txtGenero, txtDuracion, txtClasificacion, txtSipnosis, txtPuntaje;
     private JButton btnAgregar, btnEditar, btnEliminar, btnActualizar, btnSeleccionarImagen;
     private JLabel lblImagen;
-    private PeliculaDAO peliculaDAO;
-    private File imagenSeleccionada;
-    private JPanel panelForm;
+    private final PeliculaDAO peliculaDAO;
+    private String imagenPathSeleccionada;
 
     public PanelPeliculas() {
-        setLayout(new BorderLayout());
+        this.peliculaDAO = new PeliculaDAO();
+        initComponents();
+        cargarPeliculas();
+    }
+    
+    private void initComponents() {
+        setLayout(new BorderLayout(10, 10));
         setBackground(new Color(240, 248, 255));
-        
-        
-
-        try {
-            peliculaDAO = new PeliculaDAO(ConexionDB.conectar());
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Error al conectar con la base de datos", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
+        setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         // ---- Panel de título ----
         JPanel panelTitulo = new JPanel();
         panelTitulo.setBackground(new Color(30, 60, 100));
-        panelTitulo.setBorder(new EmptyBorder(15, 20, 15, 20));
         JLabel lblTitulo = new JLabel("Gestión de Películas");
         lblTitulo.setFont(new Font("Segoe UI", Font.BOLD, 20));
         lblTitulo.setForeground(Color.WHITE);
         panelTitulo.add(lblTitulo);
 
         // ---- Panel de formulario ----
-        panelForm = new JPanel();
+        JPanel panelForm = new JPanel(new GridBagLayout());
         panelForm.setBackground(Color.WHITE);
         panelForm.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(180, 210, 255), 2, true),
-                new EmptyBorder(20, 20, 20, 20)
+                BorderFactory.createTitledBorder("Datos de la Película"),
+                new EmptyBorder(10, 15, 10, 15)
         ));
-        panelForm.setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 5, 5, 5);
         gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.weightx = 1.0;
 
-        // Campos del formulario
-        agregarCampoFormulario(panelForm, gbc, "Título:", txtTitulo = crearCampoEstilizado(), 0);
-        agregarCampoFormulario(panelForm, gbc, "Género:", txtGenero = crearCampoEstilizado(), 1);
-        agregarCampoFormulario(panelForm, gbc, "Duración (min):", txtDuracion = crearCampoEstilizado(), 2);
+        // --- Fila 0 ---
+        agregarCampoFormulario(panelForm, gbc, "Título:", txtTitulo = new JTextField(), 0, 0);
+        agregarCampoFormulario(panelForm, gbc, "Género:", txtGenero = new JTextField(), 0, 2);
 
-        // Campo de imagen
-        gbc.gridx = 0;
-        gbc.gridy = 3;
-        gbc.gridwidth = 1;
+        // --- Fila 1 ---
+        agregarCampoFormulario(panelForm, gbc, "Duración (min):", txtDuracion = new JTextField(), 1, 0);
+        agregarCampoFormulario(panelForm, gbc, "Clasificación:", txtClasificacion = new JTextField(), 1, 2);
+        
+        // --- Fila 2 ---
+        agregarCampoFormulario(panelForm, gbc, "Puntaje (0.0):", txtPuntaje = new JTextField(), 2, 0);
+        
+        // --- Fila 3: Sipnosis (ocupa más espacio) ---
+        gbc.gridx = 0; gbc.gridy = 3; gbc.anchor = GridBagConstraints.NORTHWEST;
+        panelForm.add(new JLabel("Sipnosis:"), gbc);
+        gbc.gridx = 1; gbc.gridy = 3; gbc.gridwidth = 3; gbc.ipady = 40; // Mayor altura
+        txtSipnosis = new JTextField();
+        panelForm.add(txtSipnosis, gbc);
+        gbc.ipady = 0; gbc.gridwidth = 1; // Reset
+
+        // --- Fila 4: Imagen ---
+        gbc.gridx = 0; gbc.gridy = 4;
         panelForm.add(new JLabel("Imagen:"), gbc);
-
-        gbc.gridx = 1;
-        gbc.gridwidth = 2;
+        gbc.gridx = 1; gbc.gridwidth = 3;
         JPanel panelImagen = new JPanel(new BorderLayout(10, 0));
         panelImagen.setBackground(Color.WHITE);
-        btnSeleccionarImagen = new JButton("Seleccionar Imagen");
-        estilizarBoton(btnSeleccionarImagen, new Color(0, 120, 215), Color.WHITE);
-        
+        btnSeleccionarImagen = new JButton("Seleccionar...");
         lblImagen = new JLabel("No se ha seleccionado ninguna imagen");
-        lblImagen.setForeground(Color.GRAY);
-        lblImagen.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        
         panelImagen.add(btnSeleccionarImagen, BorderLayout.WEST);
         panelImagen.add(lblImagen, BorderLayout.CENTER);
         panelForm.add(panelImagen, gbc);
 
-        // Botones
-        gbc.gridx = 0;
-        gbc.gridy = 4;
-        gbc.gridwidth = 3;
-        gbc.insets = new Insets(15, 5, 5, 5);
-        
+        // ---- Panel de botones ----
         JPanel panelBotones = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 0));
         panelBotones.setBackground(Color.WHITE);
-        
         btnAgregar = new JButton("Agregar");
-        btnEditar = new JButton("Editar");
+        btnEditar = new JButton("Guardar Cambios");
         btnEliminar = new JButton("Eliminar");
-        btnActualizar = new JButton("Actualizar Lista");
-
-        estilizarBoton(btnAgregar, new Color(0, 120, 215), Color.WHITE);
-        estilizarBoton(btnEditar, new Color(255, 165, 0), Color.WHITE);
-        estilizarBoton(btnEliminar, new Color(220, 53, 69), Color.WHITE);
-        estilizarBoton(btnActualizar, new Color(108, 117, 125), Color.WHITE);
-
+        btnActualizar = new JButton("Limpiar / Cancelar");
         panelBotones.add(btnAgregar);
         panelBotones.add(btnEditar);
         panelBotones.add(btnEliminar);
         panelBotones.add(btnActualizar);
-        
-        panelForm.add(panelBotones, gbc);
 
-        // ---- Tabla ----
-        modelo = new DefaultTableModel(new Object[]{"ID", "Título", "Género", "Duración", "Imagen"}, 0) {
-            @Override
-            public boolean isCellEditable(int row, int column) {
-                return false; // Hacer la tabla no editable
-            }
+        modelo = new DefaultTableModel(new Object[]{"ID", "Título", "Género", "Duración", "Puntaje"}, 0) {
+            @Override public boolean isCellEditable(int row, int col) { return false; }
         };
-        
         tabla = new JTable(modelo);
-        tabla.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        tabla.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        tabla.setRowHeight(25);
-        tabla.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 12));
-        tabla.getTableHeader().setBackground(new Color(30, 60, 100));
-        tabla.getTableHeader().setForeground(Color.WHITE);
-        
-        // Listener para cargar datos al seleccionar una fila
-        tabla.getSelectionModel().addListSelectionListener(e -> {
-            if (!e.getValueIsAdjusting()) {
-                cargarDatosDesdeTabla();
-            }
-        });
 
-        JScrollPane scroll = new JScrollPane(tabla);
-        scroll.setBorder(BorderFactory.createLineBorder(new Color(180, 210, 255)));
-
-        // ---- Diseño principal ----
-        add(panelTitulo, BorderLayout.NORTH);
-        
+        // ---- Ensamblado Final ----
         JPanel panelCentral = new JPanel(new BorderLayout(10, 10));
-        panelCentral.setBackground(new Color(240, 248, 255));
-        panelCentral.setBorder(new EmptyBorder(10, 10, 10, 10));
         panelCentral.add(panelForm, BorderLayout.NORTH);
-        panelCentral.add(scroll, BorderLayout.CENTER);
-        
-        add(panelCentral, BorderLayout.CENTER);
+        panelCentral.add(new JScrollPane(tabla), BorderLayout.CENTER);
+        panelCentral.add(panelBotones, BorderLayout.SOUTH);
 
-        cargarPeliculas();
+        add(panelTitulo, BorderLayout.NORTH);
+        add(panelCentral, BorderLayout.CENTER);
 
         // ---- Listeners ----
         btnAgregar.addActionListener(e -> agregarPelicula());
         btnEditar.addActionListener(e -> editarPelicula());
         btnEliminar.addActionListener(e -> eliminarPelicula());
-        btnActualizar.addActionListener(e -> cargarPeliculas());
+        btnActualizar.addActionListener(e -> limpiarCampos());
         btnSeleccionarImagen.addActionListener(e -> seleccionarImagen());
-    }
-
-    private void agregarCampoFormulario(JPanel panel, GridBagConstraints gbc, String label, JComponent campo, int fila) {
-        gbc.gridx = 0;
-        gbc.gridy = fila;
-        gbc.gridwidth = 1;
-        JLabel lbl = new JLabel(label);
-        lbl.setFont(new Font("Segoe UI", Font.BOLD, 12));
-        panel.add(lbl, gbc);
-
-        gbc.gridx = 1;
-        gbc.gridwidth = 2;
-        panel.add(campo, gbc);
-    }
-
-    private JTextField crearCampoEstilizado() {
-        JTextField campo = new JTextField();
-        campo.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        campo.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(180, 210, 255), 1, true),
-                new EmptyBorder(5, 10, 5, 10)
-        ));
-        campo.setPreferredSize(new Dimension(200, 30));
-        return campo;
-    }
-
-    private void estilizarBoton(JButton boton, Color fondo, Color texto) {
-        boton.setFocusPainted(false);
-        boton.setBackground(fondo);
-        boton.setForeground(texto);
-        boton.setFont(new Font("Segoe UI", Font.BOLD, 12));
-        boton.setBorder(BorderFactory.createEmptyBorder(8, 16, 8, 16));
-        boton.setCursor(new Cursor(Cursor.HAND_CURSOR));
-
-        boton.addMouseListener(new MouseAdapter() {
-            public void mouseEntered(MouseEvent e) {
-                boton.setBackground(fondo.darker());
-            }
-
-            public void mouseExited(MouseEvent e) {
-                boton.setBackground(fondo);
-            }
+        tabla.getSelectionModel().addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) cargarDatosDesdeTabla();
         });
     }
 
@@ -210,96 +131,139 @@ public class PanelPeliculas extends JPanel {
         
         int resultado = fileChooser.showOpenDialog(this);
         if (resultado == JFileChooser.APPROVE_OPTION) {
-            imagenSeleccionada = fileChooser.getSelectedFile();
-            lblImagen.setText(imagenSeleccionada.getName());
-            lblImagen.setForeground(Color.BLACK);
+            File archivoOriginal = fileChooser.getSelectedFile();
+            
+            // CAMBIO: Copiamos la imagen a nuestro directorio y obtenemos la nueva ruta.
+            String nuevaRuta = ImageManager.saveImage(archivoOriginal);
+            
+            if (nuevaRuta != null) {
+                this.imagenPathSeleccionada = nuevaRuta;
+                // Mostramos solo el nombre del archivo para que no sea una ruta larga.
+                lblImagen.setText(new File(nuevaRuta).getName()); 
+                lblImagen.setForeground(Color.BLACK);
+            } else {
+                JOptionPane.showMessageDialog(this, "No se pudo guardar la imagen.", "Error de Archivo", JOptionPane.ERROR_MESSAGE);
+            }
         }
     }
 
-    private void cargarPeliculas() {
+    public void cargarPeliculas() {
         try {
-            modelo.setRowCount(0);
+            modelo.setRowCount(0); 
             List<Pelicula> lista = peliculaDAO.listar();
             for (Pelicula p : lista) {
-                String nombreImagen = p.getImagenPath() != null ? 
-                    new File(p.getImagenPath()).getName() : "Sin imagen";
                 modelo.addRow(new Object[]{
-                    p.getId(), 
-                    p.getTitulo(), 
-                    p.getGenero(), 
+                    p.getId(),
+                    p.getTitulo(),
+                    p.getGenero(),
                     p.getDuracion(),
-                    nombreImagen
+                    String.format("%.1f", p.getPuntaje()) // Añadido puntaje
                 });
             }
         } catch (SQLException e) {
-            JOptionPane.showMessageDialog(this, "Error al cargar las películas", "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Error al cargar las películas: " + e.getMessage(), "Error de Base de Datos", JOptionPane.ERROR_MESSAGE);
         }
     }
 
     private void cargarDatosDesdeTabla() {
         int fila = tabla.getSelectedRow();
-        if (fila != -1) {
-            txtTitulo.setText(modelo.getValueAt(fila, 1).toString());
-            txtGenero.setText(modelo.getValueAt(fila, 2).toString());
-            txtDuracion.setText(modelo.getValueAt(fila, 3).toString());
+        if (fila == -1) return; 
+
+        try {
+            int id = (int) modelo.getValueAt(fila, 0);
+            Pelicula p = peliculaDAO.buscarPorId(id); 
+            if (p == null) return;
+
+            txtTitulo.setText(p.getTitulo());
+            txtGenero.setText(p.getGenero());
+            txtDuracion.setText(String.valueOf(p.getDuracion()));
+            txtClasificacion.setText(p.getClasificacion());
+            txtSipnosis.setText(p.getSipnosis());
+            txtPuntaje.setText(String.valueOf(p.getPuntaje()));
             
-            // Para la imagen, necesitarías cargarla desde la base de datos
-            // Por ahora, simplemente limpiamos la selección
-            imagenSeleccionada = null;
-            lblImagen.setText("Seleccione nueva imagen para actualizar");
-            lblImagen.setForeground(Color.GRAY);
+            this.imagenPathSeleccionada = p.getImagenPath();
+            if (imagenPathSeleccionada != null && !imagenPathSeleccionada.isEmpty()) {
+                lblImagen.setText(new File(imagenPathSeleccionada).getName());
+            } else {
+                lblImagen.setText("No se ha seleccionado ninguna imagen");
+            }
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(this, "Error al cargar datos de la película.", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
     private void agregarPelicula() {
+        if (!validarCampos()) return;
+
         try {
-            if (!validarCampos()) return;
-
-            String titulo = txtTitulo.getText();
-            String genero = txtGenero.getText();
-            int duracion = Integer.parseInt(txtDuracion.getText());
-            String imagenPath = imagenSeleccionada != null ? imagenSeleccionada.getAbsolutePath() : null;
-
-            Pelicula pelicula = new Pelicula(titulo, genero, duracion, "", "", imagenPath);
-            pelicula.setImagenPath(imagenPath);
+            
+            Pelicula pelicula = new Pelicula(
+                txtTitulo.getText(),
+                txtGenero.getText(),
+                Integer.parseInt(txtDuracion.getText()),
+                txtClasificacion.getText(),
+                txtSipnosis.getText(),
+                imagenPathSeleccionada,
+                Double.parseDouble(txtPuntaje.getText())
+            );
 
             peliculaDAO.insertar(pelicula);
             cargarPeliculas();
             limpiarCampos();
-            JOptionPane.showMessageDialog(this, "Película agregada correctamente", "Éxito", JOptionPane.INFORMATION_MESSAGE);
-            
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Datos inválidos o error al agregar: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Película agregada correctamente.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "La duración y el puntaje deben ser números válidos.", "Error de Formato", JOptionPane.ERROR_MESSAGE);
+        } catch (HeadlessException | SQLException e) {
+            JOptionPane.showMessageDialog(this, "Error al agregar la película: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
     private void editarPelicula() {
         int fila = tabla.getSelectedRow();
         if (fila == -1) {
-            JOptionPane.showMessageDialog(this, "Seleccione una película para editar", "Atención", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Seleccione una película de la tabla para editar.", "Atención", JOptionPane.WARNING_MESSAGE);
             return;
         }
+        if (!validarCampos()) return;
 
         try {
-            if (!validarCampos()) return;
-
             int id = (int) modelo.getValueAt(fila, 0);
-            String titulo = txtTitulo.getText();
-            String genero = txtGenero.getText();
-            int duracion = Integer.parseInt(txtDuracion.getText());
-            String imagenPath = imagenSeleccionada != null ? imagenSeleccionada.getAbsolutePath() : null;
-
-            Pelicula pelicula = new Pelicula(id, titulo, genero, duracion, "", "", imagenPath);
-            pelicula.setImagenPath(imagenPath);
+            
+            Pelicula pelicula = new Pelicula(
+                id,
+                txtTitulo.getText(),
+                txtGenero.getText(),
+                Integer.parseInt(txtDuracion.getText()),
+                txtClasificacion.getText(),
+                txtSipnosis.getText(),
+                imagenPathSeleccionada,
+                Double.parseDouble(txtPuntaje.getText())
+            );
 
             peliculaDAO.actualizar(pelicula);
             cargarPeliculas();
             limpiarCampos();
-            JOptionPane.showMessageDialog(this, "Película actualizada correctamente", "Éxito", JOptionPane.INFORMATION_MESSAGE);
-            
-        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Película actualizada correctamente.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "La duración y el puntaje deben ser números válidos.", "Error de Formato", JOptionPane.ERROR_MESSAGE);
+        } catch (HeadlessException | SQLException e) {
             JOptionPane.showMessageDialog(this, "Error al editar la película: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
+    }
+    
+    private void limpiarCampos() {
+        txtTitulo.setText("");
+        txtGenero.setText("");
+        txtDuracion.setText("");
+        txtClasificacion.setText("");
+        txtSipnosis.setText("");
+        txtPuntaje.setText("");
+        imagenPathSeleccionada = null;
+        lblImagen.setText("No se ha seleccionado ninguna imagen");
+        lblImagen.setForeground(Color.GRAY);
+        tabla.clearSelection();
     }
 
     private void eliminarPelicula() {
@@ -310,13 +274,19 @@ public class PanelPeliculas extends JPanel {
         }
 
         int confirm = JOptionPane.showConfirmDialog(this, 
-                "¿Está seguro de eliminar esta película?", 
+                "¿Está seguro de eliminar esta película? Esta acción es irreversible.", 
                 "Confirmar eliminación", 
-                JOptionPane.YES_NO_OPTION);
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.WARNING_MESSAGE);
                 
         if (confirm == JOptionPane.YES_OPTION) {
             try {
+                
                 int id = (int) modelo.getValueAt(fila, 0);
+                Pelicula peliculaAEliminar = peliculaDAO.buscarPorId(id);
+                if (peliculaAEliminar != null) {
+                    ImageManager.deleteImage(peliculaAEliminar.getImagenPath());
+                }
                 peliculaDAO.eliminar(id);
                 cargarPeliculas();
                 limpiarCampos();
@@ -329,18 +299,19 @@ public class PanelPeliculas extends JPanel {
 
     private boolean validarCampos() {
         return Validador.validarCamposObligatorios(
-            Arrays.asList(txtTitulo.getText(), txtGenero.getText(), txtDuracion.getText()),
-            Arrays.asList("Título", "Género", "Duración")
+            Arrays.asList(txtTitulo.getText(), txtGenero.getText(), txtDuracion.getText(), txtPuntaje.getText()),
+            Arrays.asList("Título", "Género", "Duración", "Puntaje")
         );
     }
 
-    private void limpiarCampos() {
-        txtTitulo.setText("");
-        txtGenero.setText("");
-        txtDuracion.setText("");
-        imagenSeleccionada = null;
-        lblImagen.setText("No se ha seleccionado ninguna imagen");
-        lblImagen.setForeground(Color.GRAY);
-        tabla.clearSelection();
+    private void agregarCampoFormulario(JPanel panel, GridBagConstraints gbc, String label, JComponent campo, int fila, int columna) {
+        gbc.gridx = columna;
+        gbc.gridy = fila;
+        gbc.anchor = GridBagConstraints.EAST;
+        panel.add(new JLabel(label), gbc);
+
+        gbc.gridx = columna + 1;
+        gbc.anchor = GridBagConstraints.WEST;
+        panel.add(campo, gbc);
     }
 }

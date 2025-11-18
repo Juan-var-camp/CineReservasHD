@@ -7,7 +7,7 @@ import util.Validador;
 import java.util.List;
 import controladores.ControladorUsuario;
 import model.Usuario;
-
+import util.UIUtils;
 
 public class InicioSesionPanel extends JPanel {
 
@@ -44,16 +44,16 @@ public class InicioSesionPanel extends JPanel {
         labelBienvenida.setBorder(new EmptyBorder(0, 0, 15, 0));
 
         fieldUsuario = new JTextField();
-        estilizarCampo(fieldUsuario, "Usuario");
+        UIUtils.estilizarCampo(fieldUsuario, "Usuario");
 
         fieldPassword = new JPasswordField();
-        estilizarCampo(fieldPassword, "Contraseña");
+        UIUtils.estilizarCampo(fieldPassword, "Contraseña");
 
         btnEntrar = new JButton("Entrar");
-        estilizarBoton(btnEntrar, new Color(0, 120, 215), Color.WHITE);
+        UIUtils.estilizarBoton(btnEntrar, new Color(0, 120, 215), Color.WHITE);
 
         btnRegistrarse = new JButton("Registrarse");
-        estilizarBoton(btnRegistrarse, new Color(230, 230, 230), Color.BLACK);
+        UIUtils.estilizarBoton(btnRegistrarse, new Color(230, 230, 230), Color.BLACK);
 
         panel.add(labelBienvenida);
         panel.add(fieldUsuario);
@@ -76,54 +76,6 @@ public class InicioSesionPanel extends JPanel {
         btnRegistrarse.addActionListener(e -> registrarse());
     }
 
-    private void estilizarCampo(JTextField campo, String placeholder) {
-        campo.setMaximumSize(new Dimension(250, 35));
-        campo.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        campo.setForeground(Color.GRAY);
-        campo.setText(placeholder);
-        campo.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(180, 210, 255), 1, true),
-                new EmptyBorder(5, 10, 5, 10)
-        ));
-
-        // Placeholder funcional
-        campo.addFocusListener(new java.awt.event.FocusAdapter() {
-            public void focusGained(java.awt.event.FocusEvent e) {
-                if (campo.getText().equals(placeholder)) {
-                    campo.setText("");
-                    campo.setForeground(Color.BLACK);
-                }
-            }
-
-            public void focusLost(java.awt.event.FocusEvent e) {
-                if (campo.getText().isEmpty()) {
-                    campo.setText(placeholder);
-                    campo.setForeground(Color.GRAY);
-                }
-            }
-        });
-    }
-
-    private void estilizarBoton(JButton boton, Color fondo, Color texto) {
-        boton.setFocusPainted(false);
-        boton.setBackground(fondo);
-        boton.setForeground(texto);
-        boton.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        boton.setBorder(BorderFactory.createEmptyBorder(8, 16, 8, 16));
-        boton.setCursor(new Cursor(Cursor.HAND_CURSOR));
-
-        // Hover efecto
-        boton.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseEntered(java.awt.event.MouseEvent e) {
-                boton.setBackground(fondo.darker());
-            }
-
-            public void mouseExited(java.awt.event.MouseEvent e) {
-                boton.setBackground(fondo);
-            }
-        });
-    }
-
     private void iniciarSesion() {
         
         
@@ -134,22 +86,22 @@ public class InicioSesionPanel extends JPanel {
             return;
         }
         
-        ControladorUsuario controlador = new ControladorUsuario();
-        Usuario u = controlador.iniciarSesion(usuario, password);
+        
+        Usuario u = ControladorUsuario.getInstanciaControladorUsuario().iniciarSesion(usuario, password);
         
         if (u != null) {
-        JOptionPane.showMessageDialog(this, "Bienvenido " + u.getNombre(), "Éxito", JOptionPane.INFORMATION_MESSAGE);
-        // Aquí llamar el menu principal
+            JOptionPane.showMessageDialog(this, "Bienvenido " + u.getNombre(), "Éxito", JOptionPane.INFORMATION_MESSAGE);
+            if ("Admin".equalsIgnoreCase(u.getTipo())) {
+                MainFrame.getInstancia().cambiarVista("admin_panel");
+            } else {
+                MainFrame.getInstancia().cambiarVista("cartelera");
+            }
         } else {
             JOptionPane.showMessageDialog(this, "Usuario o contraseña incorrectos", "Error", JOptionPane.ERROR_MESSAGE);
         }
-
-
-        
     }
 
     private void registrarse() {
-        MainFrame.cambiarVista("registro");
+        MainFrame.getInstancia().cambiarVista("registro");
     }
 }
-

@@ -16,5 +16,4 @@ public class Pago {
     public String getFecha() {
         return fecha;
     }
-    
 }

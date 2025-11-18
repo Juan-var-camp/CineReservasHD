@@ -8,6 +8,7 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.util.Arrays;
+import util.UIUtils;
 
 public class RegistroPanel extends JPanel {
 
@@ -45,23 +46,23 @@ public class RegistroPanel extends JPanel {
 
         // Campos
         fieldNombre = new JTextField();
-        estilizarCampo(fieldNombre, "Nombre completo");
+        UIUtils.estilizarCampo(fieldNombre, "Nombre completo");
 
         fieldUsuario = new JTextField();
-        estilizarCampo(fieldUsuario, "Nombre de usuario");
+        UIUtils.estilizarCampo(fieldUsuario, "Nombre de usuario");
 
         fieldPassword = new JPasswordField();
-        estilizarCampo(fieldPassword, "Contraseña");
+        UIUtils.estilizarCampo(fieldPassword, "Contraseña");
 
         fieldConfirmar = new JPasswordField();
-        estilizarCampo(fieldConfirmar, "Confirmar contraseña");
+        UIUtils.estilizarCampo(fieldConfirmar, "Confirmar contraseña");
 
         // Botones
         btnRegistrar = new JButton("Registrar");
-        estilizarBoton(btnRegistrar, new Color(0, 120, 215), Color.WHITE);
+        UIUtils.estilizarBoton(btnRegistrar, new Color(0, 120, 215), Color.WHITE);
 
         btnVolver = new JButton("Volver");
-        estilizarBoton(btnVolver, new Color(230, 230, 230), Color.BLACK);
+        UIUtils.estilizarBoton(btnVolver, new Color(230, 230, 230), Color.BLACK);
 
         // Añadir componentes
         panel.add(labelTitulo);
@@ -90,53 +91,6 @@ public class RegistroPanel extends JPanel {
         btnVolver.addActionListener(e -> volverALogin());
     }
 
-    private void estilizarCampo(JTextField campo, String placeholder) {
-        campo.setMaximumSize(new Dimension(250, 35));
-        campo.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        campo.setForeground(Color.GRAY);
-        campo.setText(placeholder);
-        campo.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(180, 210, 255), 1, true),
-                new EmptyBorder(5, 10, 5, 10)
-        ));
-
-        // Placeholder funcional
-        campo.addFocusListener(new java.awt.event.FocusAdapter() {
-            public void focusGained(java.awt.event.FocusEvent e) {
-                if (campo.getText().equals(placeholder)) {
-                    campo.setText("");
-                    campo.setForeground(Color.BLACK);
-                }
-            }
-
-            public void focusLost(java.awt.event.FocusEvent e) {
-                if (campo.getText().isEmpty()) {
-                    campo.setText(placeholder);
-                    campo.setForeground(Color.GRAY);
-                }
-            }
-        });
-    }
-
-    private void estilizarBoton(JButton boton, Color fondo, Color texto) {
-        boton.setFocusPainted(false);
-        boton.setBackground(fondo);
-        boton.setForeground(texto);
-        boton.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        boton.setBorder(BorderFactory.createEmptyBorder(8, 16, 8, 16));
-        boton.setCursor(new Cursor(Cursor.HAND_CURSOR));
-
-        boton.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseEntered(java.awt.event.MouseEvent e) {
-                boton.setBackground(fondo.darker());
-            }
-
-            public void mouseExited(java.awt.event.MouseEvent e) {
-                boton.setBackground(fondo);
-            }
-        });
-    }
-
     private void registrarUsuario() {
         String nombre = fieldNombre.getText();
         String username = fieldUsuario.getText();
@@ -157,7 +111,7 @@ public class RegistroPanel extends JPanel {
         nuevo.setUsername(username);
         nuevo.setPassword(password);
 
-        ControladorUsuario controlador = new ControladorUsuario();
+        ControladorUsuario controlador = ControladorUsuario.getInstanciaControladorUsuario();
         if (controlador.registrarUsuario(nuevo)) {
             JOptionPane.showMessageDialog(this, "Registro exitoso. ¡Bienvenido!", "Éxito", JOptionPane.INFORMATION_MESSAGE);
             volverALogin();
@@ -167,6 +121,6 @@ public class RegistroPanel extends JPanel {
     }
 
     private void volverALogin() {
-        MainFrame.cambiarVista("login");
+        MainFrame.getInstancia().cambiarVista("login");
     }
 }

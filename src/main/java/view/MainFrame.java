@@ -1,91 +1,121 @@
 package view;
 
+import dao.ConexionDB;
+import model.Funcion;
 import javax.swing.*;
 import java.awt.*;
 import java.util.HashMap;
 import java.util.Map;
-import dao.ConexionDB;
-import model.Sala;
 
 public class MainFrame extends JFrame {
 
-    private static MainFrame instancia; 
-    private CardLayout cardLayout;
-    private JPanel panelContenedor;
-    private Map<String, JPanel> vistas; // Se guardan las vistas por nombre
+    private static MainFrame instancia;
+    private final CardLayout cardLayout;
+    private final JPanel panelContenedor;
+    private final Map<String, JPanel> vistas;
+    private HistorialReservasPanel historialPanel;
 
     private MainFrame() {
-        inicializarVentana();
+        setTitle("CineReservasHD");
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
+        setLocationRelativeTo(null);
+
+        cardLayout = new CardLayout();
+        panelContenedor = new JPanel(cardLayout);
+        vistas = new HashMap<>();
+        setContentPane(panelContenedor);
+
         inicializarVistas();
+        cambiarVista("login"); 
     }
 
-    public static MainFrame getInstancia() {
+    public static synchronized MainFrame getInstancia() {
         if (instancia == null) {
             instancia = new MainFrame();
         }
         return instancia;
     }
 
-    private void inicializarVentana() {
-        setTitle("CineReservas");
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setExtendedState(JFrame.MAXIMIZED_BOTH);
-        setLocationRelativeTo(null);
-        setResizable(false);
-
-        cardLayout = new CardLayout();
-        panelContenedor = new JPanel(cardLayout);
-        vistas = new HashMap<>();
-
-        setContentPane(panelContenedor);
-    }
-
     private void inicializarVistas() {
-        // Crea e inserta las vistas que quieras usar
         ConexionDB.inicializarDatabase();
-        InicioSesionPanel login = new InicioSesionPanel();
-        RegistroPanel registro = new RegistroPanel();
-        ConfiguracionSalaPanel configSala = new ConfiguracionSalaPanel();
-        MenuTestPanel menuTest = new MenuTestPanel();
-        PanelPeliculas panelPeliculas = new PanelPeliculas();
 
-        // Añadirlas al contenedor con un nombre
-        vistas.put("login", login);
-        vistas.put("registro", registro);
-        vistas.put("config_sala", configSala);
-        vistas.put("menu_test", menuTest);
-        vistas.put("panel_peliculas", panelPeliculas);
-
-        panelContenedor.add(login, "login");
-        panelContenedor.add(registro, "registro");
-        panelContenedor.add(configSala, "config_sala");
-        panelContenedor.add(menuTest, "menu_test");
-        panelContenedor.add(panelPeliculas, "panel_peliculas");
-
-        mostrarVista("menu_test");
+        // Paneles que se cargarán una vez
+        InicioSesionPanel loginPanel = new InicioSesionPanel();
+        RegistroPanel registroPanel = new RegistroPanel();
+        CarteleraPanel carteleraPanel = new CarteleraPanel();
+        historialPanel = new HistorialReservasPanel();
+        
+        AdminPanel adminPanel = new AdminPanel();
+        
+        
+        
+        // Añadir paneles al contenedor
+        panelContenedor.add(historialPanel, "historial");
+        panelContenedor.add(loginPanel, "login");
+        panelContenedor.add(registroPanel, "registro"); 
+        panelContenedor.add(carteleraPanel, "cartelera");
+        
+        panelContenedor.add(adminPanel, "admin_panel");
+        
+        // Guardar referencia en el mapa
+        vistas.put("historial", historialPanel);
+        vistas.put("login", loginPanel);
+        vistas.put("registro", registroPanel);
+        vistas.put("cartelera", carteleraPanel);
+        
+        vistas.put("admin_panel", adminPanel);
     }
 
-    public void mostrarVista(String nombreVista) {
-        JPanel vista = vistas.get(nombreVista);
-        if (vista != null) {
-            cardLayout.show(panelContenedor, nombreVista);
-        } else {
-            System.err.println("Vista no encontrada: " + nombreVista);
+    public void mostrarSeleccionSillas(Funcion funcion) {
+        if (vistas.containsKey("seleccion")) {
+            panelContenedor.remove(vistas.get("seleccion"));
         }
+        
+        SeleccionSillasPanel seleccionSillas = new SeleccionSillasPanel(
+            funcion.getNombreSala(),
+            funcion.getId(),
+            funcion.getPrecio()
+        );
+        
+        vistas.put("seleccion", seleccionSillas);
+        panelContenedor.add(seleccionSillas, "seleccion");
+        
+        cambiarVista("seleccion");
     }
 
-    public static void cambiarVista(String nombreVista) {
-        getInstancia().mostrarVista(nombreVista);
+    public void cambiarVista(String nombreVista) {
+        if ("cartelera".equals(nombreVista)) {
+            // Asegurarse de que la vista exista y sea del tipo correcto
+            Component vista = vistas.get(nombreVista);
+            if (vista instanceof CarteleraPanel carteleraPanel) {
+                carteleraPanel.cargarPeliculas();
+            }
+        }
+        
+        if ("admin_panel".equals(nombreVista)) {
+            Component vista = vistas.get(nombreVista);
+            if (vista instanceof CrearFuncionPanel) {
+                ((CrearFuncionPanel) vista).cargarDatosIniciales();
+            }    
+        }
+        cardLayout.show(panelContenedor, nombreVista);
+    }
+    
+    public void mostrarHistorial() {
+        historialPanel.cargarHistorial();
+        cambiarVista("historial");
     }
 
     public static void main(String[] args) {
         try {
-            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-        } catch (Exception e) { }
+             UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
+        } catch (ClassNotFoundException | IllegalAccessException | InstantiationException | UnsupportedLookAndFeelException e) {
+            System.err.println("Nimbus Look and Feel no encontrado.");
+        }
 
         SwingUtilities.invokeLater(() -> {
-            MainFrame frame = MainFrame.getInstancia();
-            frame.setVisible(true);
+            MainFrame.getInstancia().setVisible(true);
         });
     }
 }

@@ -8,9 +8,10 @@ public class Pelicula {
     private String clasificacion;
     private String sipnosis;
     private String imagenPath; // Nueva propiedad para la imagen
-
+    private double puntaje;
+    
     // Constructor completo
-    public Pelicula(int id, String titulo, String genero, int duracion, String clasificacion, String sipnosis, String imagenPath) {
+    public Pelicula(int id, String titulo, String genero, int duracion, String clasificacion, String sipnosis, String imagenPath, double puntaje) {
         this.id = id;
         this.titulo = titulo;
         this.genero = genero;
@@ -18,21 +19,26 @@ public class Pelicula {
         this.clasificacion = clasificacion;
         this.sipnosis = sipnosis;
         this.imagenPath = imagenPath;
+        this.puntaje = puntaje;
     }
 
     // Constructor sin ID
-    public Pelicula(String titulo, String genero, int duracion, String clasificacion, String sipnosis, String imagenPath) {
-        this(0, titulo, genero, duracion, clasificacion, sipnosis, imagenPath);
+    public Pelicula(String titulo, String genero, int duracion, String clasificacion, String sipnosis, String imagenPath, double puntaje) {
+        this(0, titulo, genero, duracion, clasificacion, sipnosis, imagenPath, puntaje);
     }
 
     // Constructor simplificado para compatibilidad (puedes eliminarlo luego)
     public Pelicula(int id, String titulo, String genero, int duracion) {
-        this(id, titulo, genero, duracion, "", "", null);
+        this(id, titulo, genero, duracion, "", "", null, 0);
     }
 
     public Pelicula(String titulo, String genero, int duracion) {
-        this(0, titulo, genero, duracion, "", "", null);
+        this(0, titulo, genero, duracion, "", "", null, 0);
     }
+
+    
+
+    
 
     // Getters y Setters
     public int getId() { return id; }
@@ -42,13 +48,15 @@ public class Pelicula {
     public String getClasificacion() { return clasificacion; }
     public String getSipnosis() { return sipnosis; }
     public String getImagenPath() { return imagenPath; }
-
+    public double getPuntaje() {return puntaje; }
+    
     public void setTitulo(String titulo) { this.titulo = titulo; }
     public void setGenero(String genero) { this.genero = genero; }
     public void setDuracion(int duracion) { this.duracion = duracion; }
     public void setClasificacion(String clasificacion) { this.clasificacion = clasificacion; }
     public void setSipnosis(String sipnosis) { this.sipnosis = sipnosis; }
     public void setImagenPath(String imagenPath) { this.imagenPath = imagenPath; }
+    public void setPuntaje(double puntaje) { this.puntaje = puntaje; }
 
     @Override
     public String toString() {

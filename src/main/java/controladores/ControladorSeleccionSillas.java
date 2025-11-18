@@ -1,80 +1,84 @@
 package controladores;
 
-import model.Sala;
 import model.Reserva;
-import view.SeleccionSillasPanel;
-
-import javax.swing.*;
+import java.awt.Point; 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Set;
 
 public class ControladorSeleccionSillas {
 
-    private final Sala sala;
     private final ControladorSala controladorSala;
     private final ControladorReserva controladorReserva;
-    private final SeleccionSillasPanel vista;
-    
-    private static final double PRECIO_SILLA = 12.0;
-    
-    private final int idFuncion;
-    private final int idUsuario;
-    
-
-    public ControladorSeleccionSillas(Sala sala, ControladorSala controladorSala, int idFuncion, int idUsuario) {
+    private ControladorUsuario controladorUsuario;
         
-        this.sala = sala;
-        this.controladorSala = controladorSala;
-        this.controladorReserva = new ControladorReserva();
+    private final int idFuncion;  //Esto puede quitarse despues de agregar el 
+    private final double precioFuncion;
+
+    public ControladorSeleccionSillas(String nombreSala, int idFuncion, double precioFuncion) {
+        this.controladorSala = ControladorSala.getInstanciaControladorSala();
+        this.controladorReserva = ControladorReserva.getInstanciaControladorReserva();
+        this.controladorUsuario = ControladorUsuario.getInstanciaControladorUsuario();
         this.idFuncion = idFuncion;
-        this.idUsuario = idUsuario;
-        this.vista = new SeleccionSillasPanel(sala, this);
+        this.precioFuncion = precioFuncion;
+        
+        controladorSala.cargarSala(nombreSala);
     }
     
-    public SeleccionSillasPanel getVista() {
-        return vista;
-    }
-    
-    public void confirmarSeleccion(Set<String> sillasSeleccionadas) {
-        if (sillasSeleccionadas.isEmpty()) {
-            vista.mostrarMensaje("Debe seleccionar al menos una silla.", "Selección vacía", JOptionPane.WARNING_MESSAGE);
-            return;
+    public boolean procesarReserva(Set<Point> coordenadasSeleccionadas) {
+        if (coordenadasSeleccionadas == null || coordenadasSeleccionadas.isEmpty()) {
+            return false; 
         }
 
-        double total = sillasSeleccionadas.size() * PRECIO_SILLA;
+        try {
+            double total = coordenadasSeleccionadas.size() * this.precioFuncion;
+            String fecha = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+            int idUsuario = controladorUsuario.getUsuarioActual().getId();
+            Reserva nuevaReserva = new Reserva(idFuncion, idUsuario, coordenadasSeleccionadas.size(), total, fecha);
 
-        // Mostrar resumen
-        StringBuilder resumen = new StringBuilder("<html><div style='text-align:left;'>");
-        resumen.append("<b>Sala:</b> ").append(sala.getNombre()).append("<br>");
-        resumen.append("<b>Sillas seleccionadas:</b><br>");
-        sillasSeleccionadas.stream().sorted().forEach(s -> resumen.append("&nbsp;&nbsp;• ").append(s).append("<br>"));
-        resumen.append("<br><b>Total:</b> $").append(total).append("</div></html>");
-        vista.mostrarMensaje(resumen.toString(), "Confirmación de Reserva", JOptionPane.INFORMATION_MESSAGE);
+            if (!controladorReserva.guardarReserva(nuevaReserva)) {
+                return false; 
+            }
 
-        // Actualizar estado de sillas
-        actualizarEstadoSillas(sillasSeleccionadas);
-        controladorSala.guardarSala(sala);
+            // CAMBIO: El método de actualización también recibe las coordenadas
+            actualizarEstadoSillasOcupadas(coordenadasSeleccionadas);
+            controladorSala.guardarSala(controladorSala.getSalaActual());
+            
+            return true; // Éxito
 
-        // Guardar reserva en la base de datos
-        String fecha = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-        Reserva reserva = new Reserva(idFuncion, idUsuario, sillasSeleccionadas.size(), total, fecha);
-        controladorReserva.guardarReserva(reserva);
-
-        vista.mostrarMensaje("Reserva registrada correctamente.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
-        vista.resetearSeleccion();
+        } catch (Exception e) {
+            System.err.println("Error procesando la reserva: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
     }
     
-    private void actualizarEstadoSillas(Set<String> sillasSeleccionadas) {
-        boolean[][] estado = sala.getEstadoSillas();
-        for (String id : sillasSeleccionadas) {
-            int fila = id.charAt(0) - 'A';
-            int columna = Integer.parseInt(id.substring(1)) - 1;
-            if (fila >= 0 && fila < estado.length && columna >= 0 && columna < estado[fila].length) {
-                estado[fila][columna] = false;
+    private void actualizarEstadoSillasOcupadas(Set<Point> coordenadas) {
+        boolean[][] ocupadas = controladorSala.getSalaActual().getSillasOcupadas();
+        for (Point p : coordenadas) {
+            int fila = p.x; // Asumiendo que guardamos (fila, columna)
+            int columna = p.y;
+
+            // Verificación de límites para seguridad
+            if (fila >= 0 && fila < ocupadas.length && columna >= 0 && columna < ocupadas[fila].length) {
+                ocupadas[fila][columna] = true;
             }
         }
     }
+   
+    public ControladorSala getControladorSala(){
+        return controladorSala;
+    }
+
+    public int getIdFuncion() {
+        return idFuncion;
+    }
+
+    public ControladorUsuario getControladorUsuario() {
+        return controladorUsuario;
+    }
     
-    
+    public ControladorReserva getControladorReserva() {
+        return controladorReserva;
+    }
 }

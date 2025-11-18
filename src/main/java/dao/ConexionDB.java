@@ -44,7 +44,8 @@ public class ConexionDB {
                     duracion INTEGER,
                     clasificacion TEXT,
                     sipnosis TEXT,
-                    imagen_path TEXT             
+                    imagen_path TEXT,
+                    puntaje REAL              
                 );
             """;
 
@@ -54,7 +55,8 @@ public class ConexionDB {
                     nombre TEXT NOT NULL UNIQUE,
                     filas INTEGER NOT NULL,
                     columnas INTEGER NOT NULL,
-                    sillas TEXT NOT NULL         
+                    sillas_activas TEXT,
+                    sillas_ocupadas TEXT       
                 );
             """;
 

@@ -28,20 +28,41 @@ public class SalaDAO {
         return matriz;
     }
     
-    public void guardarSala(Sala sala) throws SQLException {
-        String sql = "INSERT OR REPLACE INTO salas (nombre, filas, columnas, sillas) VALUES (?, ?, ?, ?)";
-        try (Connection conn = ConexionDB.conectar();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+    public boolean guardarSala(Sala sala) throws SQLException {
+        // 1. Verificamos si la sala ya existe por su nombre
+        Sala salaExistente = buscarPorNombre(sala.getNombre());
 
-            ps.setString(1, sala.getNombre());
-            ps.setInt(2, sala.getFilas());
-            ps.setInt(3, sala.getColumnas());
-            ps.setString(4, matrizABinario(sala.getEstadoSillas(), sala.getFilas(), sala.getColumnas()));
+        if (salaExistente != null) {
+            // 2. Si existe, la ACTUALIZAMOS
+            String sqlUpdate = "UPDATE salas SET filas = ?, columnas = ?, sillas_activas = ?, sillas_ocupadas = ? WHERE id = ?";
+            try (Connection conn = ConexionDB.conectar();
+                 PreparedStatement ps = conn.prepareStatement(sqlUpdate)) {
 
-            ps.executeUpdate();
+                ps.setInt(1, sala.getFilas());
+                ps.setInt(2, sala.getColumnas());
+                ps.setString(3, matrizABinario(sala.getSillasActivas(), sala.getFilas(), sala.getColumnas()));
+                ps.setString(4, matrizABinario(sala.getSillasOcupadas(), sala.getFilas(), sala.getColumnas()));
+                ps.setInt(5, salaExistente.getId()); // Usamos el ID existente
+
+                return ps.executeUpdate() > 0;
+            }
+        } else {
+            // 3. Si no existe, la INSERTAMOS
+            String sqlInsert = "INSERT INTO salas (nombre, filas, columnas, sillas_activas, sillas_ocupadas) VALUES (?, ?, ?, ?, ?)";
+            try (Connection conn = ConexionDB.conectar();
+                 PreparedStatement ps = conn.prepareStatement(sqlInsert)) {
+
+                ps.setString(1, sala.getNombre());
+                ps.setInt(2, sala.getFilas());
+                ps.setInt(3, sala.getColumnas());
+                ps.setString(4, matrizABinario(sala.getSillasActivas(), sala.getFilas(), sala.getColumnas()));
+                ps.setString(5, matrizABinario(sala.getSillasOcupadas(), sala.getFilas(), sala.getColumnas()));
+
+                return ps.executeUpdate() > 0;
+            }
         }
     }
-    
+
     public Sala cargarSala(String nombre) throws SQLException {
         String sql = "SELECT * FROM salas WHERE nombre = ?";
         try (Connection conn = ConexionDB.conectar();
@@ -51,12 +72,15 @@ public class SalaDAO {
             ResultSet rs = ps.executeQuery();
 
             if (rs.next()) {
+                int id = rs.getInt("id");
                 int filas = rs.getInt("filas");
                 int columnas = rs.getInt("columnas");
-                String binario = rs.getString("sillas");
-
-                boolean[][] sillas = binarioAMatriz(binario, filas, columnas);
-                return new Sala(nombre, filas, columnas, sillas);
+                String binarioActivas = rs.getString("sillas_activas");
+                String binarioOcupadas = rs.getString("sillas_ocupadas");
+                
+                boolean[][] sillasActivas = binarioAMatriz(binarioActivas, filas, columnas);
+                boolean[][] sillasOcupadas = binarioAMatriz(binarioOcupadas, filas, columnas);
+                return new Sala(id, nombre, filas, columnas, sillasActivas, sillasOcupadas);
             }
         }
         return null;
@@ -71,16 +95,42 @@ public class SalaDAO {
              ResultSet rs = st.executeQuery(sql)) {
 
             while (rs.next()) {
+                int id = rs.getInt("id");
                 String nombre = rs.getString("nombre");
                 int filas = rs.getInt("filas");
                 int columnas = rs.getInt("columnas");
-                String binario = rs.getString("sillas");
-                boolean[][] sillas = binarioAMatriz(binario, filas, columnas);
+                String binarioActivas = rs.getString("sillas_activas");
+                String binarioOcupadas = rs.getString("sillas_ocupadas");
+                boolean[][] sillasActivas = binarioAMatriz(binarioActivas, filas, columnas);
+                boolean[][] sillasOcupadas = binarioAMatriz(binarioOcupadas, filas, columnas);
 
-                salas.add(new Sala(nombre, filas, columnas, sillas));
+                salas.add(new Sala(id, nombre, filas, columnas, sillasActivas, sillasOcupadas));
             }
         }
         return salas;
+    }
+    
+    public Sala buscarPorNombre(String nombre) throws SQLException {
+        String sql = "SELECT * FROM salas WHERE nombre = ?";
+        try (Connection conn = ConexionDB.conectar();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, nombre);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    int id = rs.getInt("id");
+                    int filas = rs.getInt("filas");
+                    int columnas = rs.getInt("columnas");
+                    String binarioActivas = rs.getString("sillas_activas");
+                    String binarioOcupadas = rs.getString("sillas_ocupadas");
+
+                    boolean[][] sillasActivas = binarioAMatriz(binarioActivas, filas, columnas);
+                    boolean[][] sillasOcupadas = binarioAMatriz(binarioOcupadas, filas, columnas);
+                    return new Sala(id, nombre, filas, columnas, sillasActivas, sillasOcupadas);
+                }
+            }
+        }
+        return null; // Retorna null si no se encuentra la sala
     }
     
     public void eliminarSala(String nombre) throws SQLException {

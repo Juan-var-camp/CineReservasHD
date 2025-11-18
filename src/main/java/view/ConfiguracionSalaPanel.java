@@ -28,7 +28,7 @@ public class ConfiguracionSalaPanel extends JPanel {
     private boolean arrastrando = false;
     private boolean activar = true;
 
-    private final ControladorSala controladorSala = new ControladorSala();
+    private ControladorSala controladorSala = ControladorSala.getInstanciaControladorSala();
 
     public ConfiguracionSalaPanel() {
         setLayout(new BorderLayout());
@@ -206,7 +206,7 @@ public class ConfiguracionSalaPanel extends JPanel {
         }
     }
 
-    private void cargarSalasEnCombo() {
+    public void cargarSalasEnCombo() {
         comboSalas.removeAllItems();
         comboSalas.addItem("Nueva sala...");
 
@@ -225,24 +225,12 @@ public class ConfiguracionSalaPanel extends JPanel {
         spinnerColumnas.setValue(sala.getColumnas());
 
         generarSillas(sala.getFilas(), sala.getColumnas());
-        boolean[][] estado = sala.getEstadoSillas();
+        boolean[][] estado = sala.getSillasActivas();
 
         for (int i = 0; i < sala.getFilas(); i++) {
             for (int j = 0; j < sala.getColumnas(); j++) {
                 cambiarEstado(botonesSillas[i][j], estado[i][j]);
             }
         }
-    }
-
-    private boolean[][] getEstadoSillas(int filas, int columnas) {
-        boolean[][] estado = new boolean[filas][columnas];
-        for (int i = 0; i < filas; i++) {
-            for (int j = 0; j < columnas; j++) {
-                if (botonesSillas[i][j] != null) {
-                    estado[i][j] = botonesSillas[i][j].isEnabled();
-                }
-            }
-        }
-        return estado;
-    }
+    }    
 }

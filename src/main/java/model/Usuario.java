@@ -1,6 +1,7 @@
 package model;
 
 public class Usuario {
+    private int id;
     private String username;
     private String password;
     private String nombre;
@@ -8,7 +9,8 @@ public class Usuario {
 
     public Usuario() {}
     
-    public Usuario(String username, String password, String nombre) {
+    public Usuario(int id, String username, String password, String nombre) {
+        this.id = id;
         this.username = username;
         this.password = password;
         this.nombre = nombre;
@@ -45,6 +47,12 @@ public class Usuario {
     public void setTipo(String tipo) {
         this.tipo = tipo;
     }
-    
-    
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public int getId() {
+        return id;
+    }
 }

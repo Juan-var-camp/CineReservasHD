@@ -7,16 +7,35 @@ import java.util.List;
 
 public class ControladorSala {
     
+    private static ControladorSala instancia;
     private final SalaDAO salaDAO;
+    private  Sala salaActual;
     
-    public ControladorSala() {
+    private ControladorSala() {
         salaDAO = new SalaDAO();
+        
     }
+    
+    public static synchronized ControladorSala getInstanciaControladorSala() {
+        if (instancia == null) {
+            instancia = new ControladorSala();
+        }
+        return instancia;
+    }
+    
+    
+    
+
+    public Sala getSalaActual() {
+        return salaActual;
+    }
+    
+    
     
     public boolean guardarSala(Sala sala) {
         try {
-            salaDAO.guardarSala(sala);
-            return true;
+            // El DAO ahora devuelve un boolean que indica el éxito real de la operación.
+            return salaDAO.guardarSala(sala);
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
@@ -26,7 +45,8 @@ public class ControladorSala {
     // Obtener una sala por nombre
     public Sala cargarSala(String nombre) {
         try {
-            return salaDAO.cargarSala(nombre);
+            this.salaActual = salaDAO.cargarSala(nombre);
+            return salaActual;
         } catch (SQLException e) {
             e.printStackTrace();
             return null;
