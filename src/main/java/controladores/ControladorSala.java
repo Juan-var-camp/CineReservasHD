@@ -53,6 +53,16 @@ public class ControladorSala {
         }
     }
     
+    public Sala cargarSala(int id) {
+        try {
+            this.salaActual = salaDAO.cargarSala(id);
+            return salaActual;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+    
     // Listar todas las salas
     public List<Sala> listarSalas() {
         try {
@@ -63,7 +73,6 @@ public class ControladorSala {
         }
     }
     
-    // Eliminar una sala por nombre
     public boolean eliminarSala(String nombre) {
         try {
             salaDAO.eliminarSala(nombre);

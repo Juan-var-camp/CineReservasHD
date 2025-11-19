@@ -30,10 +30,8 @@ public class DetallesDialog extends JDialog {
         panelContenido.setBackground(COLOR_FONDO);
         panelContenido.setBorder(BorderFactory.createEmptyBorder(30, 40, 30, 40));
 
-        // Panel Izquierdo: Imagen
         JLabel labelImagen = new JLabel();
         labelImagen.setPreferredSize(new Dimension(280, 400));
-        // (La lógica para cargar la imagen es la misma que en PeliculaCardPanel)
         try {
             ImageIcon icon = new ImageIcon(new ImageIcon(pelicula.getImagenPath()).getImage().getScaledInstance(280, 400, Image.SCALE_SMOOTH));
             labelImagen.setIcon(icon);
@@ -42,13 +40,9 @@ public class DetallesDialog extends JDialog {
         }
         panelContenido.add(labelImagen, BorderLayout.WEST);
 
-        // Panel Derecho: Información y Horarios
         JPanel panelDerecho = new JPanel();
         panelDerecho.setLayout(new BoxLayout(panelDerecho, BoxLayout.Y_AXIS));
         panelDerecho.setOpaque(false);
-
-        // ... (Adaptar la creación de título, badges, descripción, etc. del proyecto original)
-        // ... Usando los datos del objeto `pelicula` y fuentes como "Segoe UI".
 
         JLabel labelHorariosTitulo = new JLabel("Funciones Disponibles");
         labelHorariosTitulo.setFont(new Font("Segoe UI", Font.BOLD, 20));
@@ -75,7 +69,6 @@ public class DetallesDialog extends JDialog {
             return panelPrincipal;
         }
 
-        // Agrupar funciones por fecha para una mejor visualización
         Map<String, List<Funcion>> funcionesPorFecha = funciones.stream()
             .collect(Collectors.groupingBy(Funcion::getFecha));
 
@@ -103,10 +96,9 @@ public class DetallesDialog extends JDialog {
 
         for (Funcion funcion : funciones) {
             JButton btnHorario = new JButton(funcion.getHora() + " (" + funcion.getNombreSala() + ")");
-            // Estilizar el botón
             btnHorario.setCursor(new Cursor(Cursor.HAND_CURSOR));
             btnHorario.addActionListener(e -> {
-                this.dispose(); // Cierra el diálogo actual
+                this.dispose(); 
                 MainFrame.getInstancia().mostrarSeleccionSillas(funcion);
             });
             panelBotones.add(btnHorario);

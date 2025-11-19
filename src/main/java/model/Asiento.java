@@ -3,7 +3,7 @@ package model;
 public class Asiento {
     private int fila;
     private int columna;
-    private boolean disponible; //Libre, Ocupado
+    private boolean disponible; 
     private String codigo;
     private boolean desactivado;
     

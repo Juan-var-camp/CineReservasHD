@@ -15,7 +15,6 @@ import java.util.List;
 
 public class CrearFuncionPanel extends JPanel {
 
-    // Componentes de la UI
     private JComboBox<PeliculaItem> comboPeliculas;
     private JComboBox<SalaItem> comboSalas;
     private JDateChooser dateChooser;
@@ -23,7 +22,6 @@ public class CrearFuncionPanel extends JPanel {
     private JTextField txtPrecio;
     private JButton btnGuardar, btnLimpiar;
 
-    // Controladores
     private final ControladorFuncion controladorFuncion;
     private final ControladorPelicula controladorPelicula;
     private final ControladorSala controladorSala;
@@ -42,7 +40,6 @@ public class CrearFuncionPanel extends JPanel {
         setBorder(new EmptyBorder(20, 40, 20, 40));
         setBackground(new Color(240, 248, 255));
 
-        // Panel de Título
         JPanel panelTitulo = new JPanel();
         panelTitulo.setBackground(new Color(30, 60, 100));
         JLabel lblTitulo = new JLabel("Gestión de Funciones de Cine");
@@ -50,7 +47,6 @@ public class CrearFuncionPanel extends JPanel {
         lblTitulo.setForeground(Color.WHITE);
         panelTitulo.add(lblTitulo);
 
-        // Panel de Formulario
         JPanel panelForm = new JPanel(new GridBagLayout());
         panelForm.setBackground(Color.WHITE);
         panelForm.setBorder(BorderFactory.createCompoundBorder(
@@ -104,7 +100,6 @@ public class CrearFuncionPanel extends JPanel {
     }
 
     private void guardarFuncion() {
-        // 1. Obtener los objetos seleccionados de los ComboBox
         PeliculaItem peliculaSeleccionada = (PeliculaItem) comboPeliculas.getSelectedItem();
         SalaItem salaSeleccionada = (SalaItem) comboSalas.getSelectedItem();
         
@@ -113,14 +108,12 @@ public class CrearFuncionPanel extends JPanel {
             return;
         }
 
-        // 2. Validar la fecha
         Date fechaSeleccionada = dateChooser.getDate();
         if (fechaSeleccionada == null) {
             JOptionPane.showMessageDialog(this, "Debe seleccionar una fecha.", "Error de Validación", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
-        // 3. Validar el precio
         double precio;
         try {
             precio = Double.parseDouble(txtPrecio.getText());
@@ -130,7 +123,6 @@ public class CrearFuncionPanel extends JPanel {
             return;
         }
 
-        // 4. Formatear datos y llamar al controlador
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         String fechaFormateada = sdf.format(fechaSeleccionada);
         String horaFormateada = String.format("%02d:%02d", spinnerHora.getValue(), spinnerMinuto.getValue());
@@ -139,10 +131,10 @@ public class CrearFuncionPanel extends JPanel {
         
         String resultado = controladorFuncion.crearFuncionConValidacion(idPelicula, idSala, fechaFormateada, horaFormateada, precio);
         
-        if (resultado == null) { // Éxito
+        if (resultado == null) { 
             JOptionPane.showMessageDialog(this, "Función creada exitosamente.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
             limpiarCampos();
-        } else { // Hubo un error
+        } else { 
             JOptionPane.showMessageDialog(this, resultado, "Error al Crear Función", JOptionPane.ERROR_MESSAGE);
         }
     }
@@ -157,14 +149,12 @@ public class CrearFuncionPanel extends JPanel {
     }
 
     public void cargarDatosIniciales() {
-        // Cargar películas en el ComboBox
         comboPeliculas.removeAllItems();
         List<Pelicula> peliculas = controladorPelicula.listarPeliculas();
         for (Pelicula p : peliculas) {
             comboPeliculas.addItem(new PeliculaItem(p.getId(), p.getTitulo()));
         }
 
-        // Cargar salas en el ComboBox
         comboSalas.removeAllItems();
         List<Sala> salas = controladorSala.listarSalas();
         for (Sala s : salas) {
@@ -172,7 +162,6 @@ public class CrearFuncionPanel extends JPanel {
         }
     }
 
-    // Clases internas para manejar objetos en los JComboBox
     private static class PeliculaItem {
         private final int id;
         private final String titulo;

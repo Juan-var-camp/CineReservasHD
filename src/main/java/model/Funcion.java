@@ -8,6 +8,9 @@ public class Funcion {
     private String hora;
     private double precio;
     private String nombreSala;
+    private boolean[][] sillasOcupadas;
+    private int filasSala;
+    private int columnasSala;
 
     public Funcion(int idPelicula, int idSala, String fecha, String hora, double precio) {
         this.idPelicula = idPelicula;
@@ -80,5 +83,29 @@ public class Funcion {
 
     public void setNombreSala(String nombreSala) {
         this.nombreSala = nombreSala;
+    }
+
+    public boolean[][] getSillasOcupadas() {
+        return sillasOcupadas;
+    }
+
+    public void setSillasOcupadas(boolean[][] sillasOcupadas) {
+        this.sillasOcupadas = sillasOcupadas;
+    }
+
+    public int getFilasSala() {
+        return filasSala;
+    }
+
+    public void setFilasSala(int filasSala) {
+        this.filasSala = filasSala;
+    }
+
+    public int getColumnasSala() {
+        return columnasSala;
+    }
+
+    public void setColumnasSala(int columnasSala) {
+        this.columnasSala = columnasSala;
     }
 }

@@ -18,7 +18,6 @@ public class PanelPeliculas extends JPanel {
 
     private JTable tabla;
     private DefaultTableModel modelo;
-    // --- CAMPOS DEL FORMULARIO ---
     private JTextField txtTitulo, txtGenero, txtDuracion, txtClasificacion, txtSipnosis, txtPuntaje;
     private JButton btnAgregar, btnEditar, btnEliminar, btnActualizar, btnSeleccionarImagen;
     private JLabel lblImagen;
@@ -36,7 +35,6 @@ public class PanelPeliculas extends JPanel {
         setBackground(new Color(240, 248, 255));
         setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-        // ---- Panel de título ----
         JPanel panelTitulo = new JPanel();
         panelTitulo.setBackground(new Color(30, 60, 100));
         JLabel lblTitulo = new JLabel("Gestión de Películas");
@@ -44,7 +42,6 @@ public class PanelPeliculas extends JPanel {
         lblTitulo.setForeground(Color.WHITE);
         panelTitulo.add(lblTitulo);
 
-        // ---- Panel de formulario ----
         JPanel panelForm = new JPanel(new GridBagLayout());
         panelForm.setBackground(Color.WHITE);
         panelForm.setBorder(BorderFactory.createCompoundBorder(
@@ -56,26 +53,21 @@ public class PanelPeliculas extends JPanel {
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.weightx = 1.0;
 
-        // --- Fila 0 ---
         agregarCampoFormulario(panelForm, gbc, "Título:", txtTitulo = new JTextField(), 0, 0);
         agregarCampoFormulario(panelForm, gbc, "Género:", txtGenero = new JTextField(), 0, 2);
 
-        // --- Fila 1 ---
         agregarCampoFormulario(panelForm, gbc, "Duración (min):", txtDuracion = new JTextField(), 1, 0);
         agregarCampoFormulario(panelForm, gbc, "Clasificación:", txtClasificacion = new JTextField(), 1, 2);
         
-        // --- Fila 2 ---
         agregarCampoFormulario(panelForm, gbc, "Puntaje (0.0):", txtPuntaje = new JTextField(), 2, 0);
         
-        // --- Fila 3: Sipnosis (ocupa más espacio) ---
         gbc.gridx = 0; gbc.gridy = 3; gbc.anchor = GridBagConstraints.NORTHWEST;
         panelForm.add(new JLabel("Sipnosis:"), gbc);
-        gbc.gridx = 1; gbc.gridy = 3; gbc.gridwidth = 3; gbc.ipady = 40; // Mayor altura
+        gbc.gridx = 1; gbc.gridy = 3; gbc.gridwidth = 3; gbc.ipady = 40; 
         txtSipnosis = new JTextField();
         panelForm.add(txtSipnosis, gbc);
-        gbc.ipady = 0; gbc.gridwidth = 1; // Reset
+        gbc.ipady = 0; gbc.gridwidth = 1; 
 
-        // --- Fila 4: Imagen ---
         gbc.gridx = 0; gbc.gridy = 4;
         panelForm.add(new JLabel("Imagen:"), gbc);
         gbc.gridx = 1; gbc.gridwidth = 3;
@@ -87,7 +79,6 @@ public class PanelPeliculas extends JPanel {
         panelImagen.add(lblImagen, BorderLayout.CENTER);
         panelForm.add(panelImagen, gbc);
 
-        // ---- Panel de botones ----
         JPanel panelBotones = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 0));
         panelBotones.setBackground(Color.WHITE);
         btnAgregar = new JButton("Agregar");
@@ -104,7 +95,6 @@ public class PanelPeliculas extends JPanel {
         };
         tabla = new JTable(modelo);
 
-        // ---- Ensamblado Final ----
         JPanel panelCentral = new JPanel(new BorderLayout(10, 10));
         panelCentral.add(panelForm, BorderLayout.NORTH);
         panelCentral.add(new JScrollPane(tabla), BorderLayout.CENTER);
@@ -113,7 +103,6 @@ public class PanelPeliculas extends JPanel {
         add(panelTitulo, BorderLayout.NORTH);
         add(panelCentral, BorderLayout.CENTER);
 
-        // ---- Listeners ----
         btnAgregar.addActionListener(e -> agregarPelicula());
         btnEditar.addActionListener(e -> editarPelicula());
         btnEliminar.addActionListener(e -> eliminarPelicula());
@@ -133,12 +122,10 @@ public class PanelPeliculas extends JPanel {
         if (resultado == JFileChooser.APPROVE_OPTION) {
             File archivoOriginal = fileChooser.getSelectedFile();
             
-            // CAMBIO: Copiamos la imagen a nuestro directorio y obtenemos la nueva ruta.
             String nuevaRuta = ImageManager.saveImage(archivoOriginal);
             
             if (nuevaRuta != null) {
                 this.imagenPathSeleccionada = nuevaRuta;
-                // Mostramos solo el nombre del archivo para que no sea una ruta larga.
                 lblImagen.setText(new File(nuevaRuta).getName()); 
                 lblImagen.setForeground(Color.BLACK);
             } else {
@@ -157,7 +144,7 @@ public class PanelPeliculas extends JPanel {
                     p.getTitulo(),
                     p.getGenero(),
                     p.getDuracion(),
-                    String.format("%.1f", p.getPuntaje()) // Añadido puntaje
+                    String.format("%.1f", p.getPuntaje()) 
                 });
             }
         } catch (SQLException e) {
@@ -298,10 +285,55 @@ public class PanelPeliculas extends JPanel {
     }
 
     private boolean validarCampos() {
-        return Validador.validarCamposObligatorios(
+        
+        if (!Validador.validarCamposObligatorios(
             Arrays.asList(txtTitulo.getText(), txtGenero.getText(), txtDuracion.getText(), txtPuntaje.getText()),
             Arrays.asList("Título", "Género", "Duración", "Puntaje")
-        );
+        )) {
+            return false;
+        }
+        
+        //Validacion de puntajes de 0,0 a 10,0
+        try {
+            double puntaje = Double.parseDouble(txtPuntaje.getText().trim());
+            if (puntaje < 0.0 || puntaje > 10.0) {
+                JOptionPane.showMessageDialog(this, 
+                    "El puntaje debe estar entre 0.0 y 10.0", 
+                    "Error de Validación", 
+                    JOptionPane.ERROR_MESSAGE);
+                txtPuntaje.requestFocus();
+                return false;
+            }
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, 
+                "El puntaje debe ser un número válido", 
+                "Error de Formato", 
+                JOptionPane.ERROR_MESSAGE);
+            txtPuntaje.requestFocus();
+            return false;
+        }
+        
+        //Validacion de la duracion de la pelicula
+        try {
+            int duracion = Integer.parseInt(txtDuracion.getText().trim());
+            if (duracion <= 0) {
+                JOptionPane.showMessageDialog(this, 
+                    "La duración debe ser un número positivo", 
+                    "Error de Validación", 
+                    JOptionPane.ERROR_MESSAGE);
+                txtDuracion.requestFocus();
+                return false;
+            }
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, 
+                "La duración debe ser un número entero válido", 
+                "Error de Formato", 
+                JOptionPane.ERROR_MESSAGE);
+            txtDuracion.requestFocus();
+            return false;
+        }
+
+        return true;
     }
 
     private void agregarCampoFormulario(JPanel panel, GridBagConstraints gbc, String label, JComponent campo, int fila, int columna) {

@@ -28,12 +28,10 @@ public class ReportesPanel extends JPanel {
         setBorder(new EmptyBorder(20, 40, 20, 40));
         setBackground(new Color(240, 248, 255));
 
-        // Título
         JLabel lblTitulo = new JLabel("Generación de Reportes", SwingConstants.CENTER);
         lblTitulo.setFont(new Font("Segoe UI", Font.BOLD, 22));
         add(lblTitulo, BorderLayout.NORTH);
 
-        // Panel de configuración
         JPanel panelConfig = new JPanel(new GridBagLayout());
         panelConfig.setBorder(BorderFactory.createTitledBorder("Configuración del Reporte"));
         GridBagConstraints gbc = new GridBagConstraints();

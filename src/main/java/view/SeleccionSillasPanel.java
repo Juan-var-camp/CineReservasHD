@@ -1,6 +1,7 @@
 package view;
 
 import controladores.ControladorSeleccionSillas;
+import model.Funcion;
 import model.Sala;
 import javax.swing.*;
 import java.awt.*;
@@ -10,10 +11,9 @@ import java.util.stream.Collectors;
 
 public class SeleccionSillasPanel extends JPanel {
     
-    //Constantes para los colores
-    private static final Color COLOR_DISPONIBLE = new Color(144, 238, 144); // Verde claro
-    private static final Color COLOR_SELECCIONADA = new Color(65, 105, 225); // Azul rey
-    private static final Color COLOR_OCUPADA = new Color(220, 20, 60);    // Rojo carmesí
+    private static final Color COLOR_DISPONIBLE = new Color(144, 238, 144); 
+    private static final Color COLOR_SELECCIONADA = new Color(65, 105, 225); 
+    private static final Color COLOR_OCUPADA = new Color(220, 20, 60);    
     
     private final ControladorSeleccionSillas controlador;
     private final Set<SeatButton> sillasSeleccionadas;
@@ -23,28 +23,31 @@ public class SeleccionSillasPanel extends JPanel {
     private final double precioPorSilla;
 
     private JLabel lblInfo;
+    private Timer timer;
+    private int tiempoRestante = 600; // 10 minutos en segundos
+    private JLabel lblTiempo;
     
-    public SeleccionSillasPanel(String nombreSala, int idFuncion, double precio) {
-        this.controlador = new ControladorSeleccionSillas(nombreSala, idFuncion, precio);
-        this.precioPorSilla = precio;
+    public SeleccionSillasPanel(Funcion funcion) {
+        this.controlador = new ControladorSeleccionSillas(funcion);
+        this.precioPorSilla = funcion.getPrecio();
         
-        Sala salaActual = controlador.getControladorSala().getSalaActual();
+        Sala salaActual = controlador.getSalaActual();
         this.filas = salaActual.getFilas();
         this.columnas = salaActual.getColumnas();
         this.sillasSeleccionadas = new HashSet<>();
         this.componentesSillas = new Component[filas][columnas];
 
-        initComponents(salaActual);
+        initComponents(salaActual, funcion);
+        iniciarTimer();
     }
 
-    private void initComponents(Sala sala) {
+    private void initComponents(Sala sala, Funcion funcion) {
         setLayout(new BorderLayout(10, 10));
         setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
         setBackground(new Color(240, 248, 255));
 
-        // --- Panel superior: Pantalla ---
         JPanel panelPantalla = new JPanel();
-        panelPantalla.setBackground(new Color(25, 25, 112)); // Azul 
+        panelPantalla.setBackground(new Color(25, 25, 112));  
         panelPantalla.setPreferredSize(new Dimension(0, 50));
         
         JLabel lblPantalla = new JLabel("PANTALLA", JLabel.CENTER);
@@ -52,12 +55,13 @@ public class SeleccionSillasPanel extends JPanel {
         lblPantalla.setFont(new Font("Segoe UI", Font.BOLD, 18));
         panelPantalla.add(lblPantalla);
 
-        // --- Panel central: Sillas ---
         JPanel panelSillas = new JPanel(new GridLayout(filas, columnas, 5, 5));
         panelSillas.setBackground(new Color(240, 248, 255));
         panelSillas.setBorder(BorderFactory.createTitledBorder(
             "Seleccione sus asientos - Sala: " + sala.getNombre()
         ));
+        
+        boolean[][] sillasOcupadasFuncion = funcion.getSillasOcupadas();
 
         char letraFila = 'A';
         for (int i = 0; i < filas; i++) {
@@ -68,10 +72,10 @@ public class SeleccionSillasPanel extends JPanel {
                     String idVisible = letraFila + "" + contadorAsientosVisibles;
                     SeatButton btnSilla = new SeatButton(idVisible, i, j); 
                     
-                    if (sala.isOcupada(i, j)) {
+                    if (sillasOcupadasFuncion[i][j]) {
                         btnSilla.setOcupada(true);
                     } else {
-                        btnSilla.setOcupada(false); // Usar el nuevo método
+                        btnSilla.setOcupada(false); 
                         btnSilla.addActionListener(e -> {
                             if (!btnSilla.isOcupada()) {
                             toggleSillaSeleccionada(btnSilla);
@@ -94,13 +98,35 @@ public class SeleccionSillasPanel extends JPanel {
             letraFila++;
         }
 
-        // --- Panel inferior: Información y confirmación ---
         JPanel panelInfo = crearPanelInfo();
 
-        // --- Ensamblar todo ---
         add(panelPantalla, BorderLayout.NORTH);
         add(panelSillas, BorderLayout.CENTER);
         add(panelInfo, BorderLayout.SOUTH);
+    }
+    
+    private void iniciarTimer() {
+        timer = new Timer(1000, e -> {
+            tiempoRestante--;
+            actualizarLabelTiempo();
+            if (tiempoRestante <= 0) {
+                timer.stop();
+                JOptionPane.showMessageDialog(this,
+                        "Se ha agotado el tiempo para la selección de asientos.",
+                        "Tiempo Agotado",
+                        JOptionPane.WARNING_MESSAGE);
+                MainFrame.getInstancia().cambiarVista("cartelera");
+            }
+        });
+        timer.start();
+    }
+
+    private void actualizarLabelTiempo() {
+        int minutos = tiempoRestante / 60;
+        int segundos = tiempoRestante % 60;
+        lblTiempo.setText(String.format("Tiempo Restante: %02d:%02d", minutos, segundos));
+        lblTiempo.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        lblTiempo.setForeground(tiempoRestante < 60 ? Color.RED : Color.BLACK);
     }
 
     private void toggleSillaSeleccionada(SeatButton botonSilla) {
@@ -128,17 +154,17 @@ public class SeleccionSillasPanel extends JPanel {
 
         JButton btnConfirmar = new JButton("Confirmar Reserva");
         btnConfirmar.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        btnConfirmar.setBackground(new Color(46, 139, 87)); // Verde marino
+        btnConfirmar.setBackground(new Color(46, 139, 87)); 
         btnConfirmar.setForeground(Color.WHITE);
         btnConfirmar.setCursor(new Cursor(Cursor.HAND_CURSOR));
         
-        JButton btnCancelar = new JButton("Cancelar"); // <-- NUEVO BOTÓN
+        JButton btnCancelar = new JButton("Cancelar"); 
         btnCancelar.setFont(new Font("Segoe UI", Font.BOLD, 14));
         btnCancelar.setCursor(new Cursor(Cursor.HAND_CURSOR));
         
         btnConfirmar.addActionListener(e -> confirmarSeleccion());
         
-        btnCancelar.addActionListener(e -> { // <-- FUNCIONALIDAD DEL NUEVO BOTÓN
+        btnCancelar.addActionListener(e -> { 
             String mensaje = "¿Estás seguro de que quieres cancelar y volver a la cartelera?";
             if (!sillasSeleccionadas.isEmpty()) {
                 mensaje += "\nPerderás los asientos que has seleccionado.";
@@ -152,6 +178,7 @@ public class SeleccionSillasPanel extends JPanel {
             );
             
             if (confirm == JOptionPane.YES_OPTION) {
+                timer.stop();
                 MainFrame.getInstancia().cambiarVista("cartelera");
             }
         });
@@ -161,19 +188,27 @@ public class SeleccionSillasPanel extends JPanel {
         panelAcciones.add(btnCancelar); 
         panelAcciones.add(btnConfirmar); 
 
-        // Leyenda de colores
         JPanel panelLeyenda = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 5));
         panelLeyenda.setBackground(new Color(240, 248, 255));
         panelLeyenda.add(crearMuestra(COLOR_DISPONIBLE, "Disponible"));
         panelLeyenda.add(crearMuestra(COLOR_SELECCIONADA, "Seleccionado"));
         panelLeyenda.add(crearMuestra(COLOR_OCUPADA, "Ocupado"));
 
+        JPanel panelNorteInfo = new JPanel(new BorderLayout());
+        panelNorteInfo.setOpaque(false);
+        
+        lblTiempo = new JLabel();
+        actualizarLabelTiempo();
+        
+        panelNorteInfo.add(lblInfo, BorderLayout.CENTER);
+        panelNorteInfo.add(lblTiempo, BorderLayout.EAST);
+
         JPanel panelSur = new JPanel(new BorderLayout());
         panelSur.setOpaque(false);
         panelSur.add(panelLeyenda, BorderLayout.NORTH);
         panelSur.add(panelAcciones, BorderLayout.SOUTH);
 
-        panelInfo.add(lblInfo, BorderLayout.CENTER);
+        panelInfo.add(panelNorteInfo, BorderLayout.CENTER);
         panelInfo.add(panelSur, BorderLayout.SOUTH);
         
         return panelInfo;
@@ -208,14 +243,6 @@ public class SeleccionSillasPanel extends JPanel {
         }
     }
     
-    public void mostrarMensaje(String mensaje, String titulo, int tipo) {
-        JOptionPane.showMessageDialog(this, mensaje, titulo, tipo);
-    }
-    
-    public int preguntar(String pregunta, String titulo) {
-        return JOptionPane.showConfirmDialog(this, pregunta, titulo, JOptionPane.YES_NO_OPTION);
-    }
-    
     private void confirmarSeleccion() {
         if (sillasSeleccionadas.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Debe seleccionar al menos un asiento.", "Selección vacía", JOptionPane.WARNING_MESSAGE);
@@ -234,8 +261,11 @@ public class SeleccionSillasPanel extends JPanel {
         dialogoPago.setVisible(true);
         
         if (dialogoPago.isPagoExitoso()) {
+            timer.stop();
             actualizarSillasOcupadas();
             resetearSeleccion();
+            JOptionPane.showMessageDialog(this, "¡Reserva completada con éxito!", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+            MainFrame.getInstancia().cambiarVista("cartelera");
         } else {
             System.out.println("El pago fue cancelado por el usuario.");
         }

@@ -26,7 +26,6 @@ public class PeliculaCardPanel extends JPanel {
         setMaximumSize(new Dimension(Integer.MAX_VALUE, 280));
         setCursor(new Cursor(Cursor.HAND_CURSOR));
 
-        // Efecto hover
         addMouseListener(new MouseAdapter() {
             @Override
             public void mouseEntered(MouseEvent e) {
@@ -41,7 +40,6 @@ public class PeliculaCardPanel extends JPanel {
     }
 
     private void crearComponentes(Pelicula pelicula) {
-        // Panel para la imagen del póster
         JLabel labelImagen = new JLabel();
         labelImagen.setPreferredSize(new Dimension(180, 250));
         labelImagen.setHorizontalAlignment(SwingConstants.CENTER);
@@ -88,12 +86,8 @@ public class PeliculaCardPanel extends JPanel {
         JPanel panelPuntaje = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
         panelPuntaje.setOpaque(false);
         panelPuntaje.setAlignmentX(Component.LEFT_ALIGNMENT);
-        JLabel estrella = new JLabel("★"); // Símbolo de estrella
-        estrella.setForeground(new Color(255, 193, 7));
-        estrella.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 18));
         JLabel labelPuntaje = new JLabel(String.format("%.1f / 10.0", pelicula.getPuntaje()));
         labelPuntaje.setFont(new Font("Segoe UI", Font.BOLD, 16));
-        panelPuntaje.add(estrella);
         panelPuntaje.add(labelPuntaje);
         panelInfo.add(panelPuntaje);
 

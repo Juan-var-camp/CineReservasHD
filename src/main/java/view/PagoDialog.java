@@ -37,8 +37,7 @@ public class PagoDialog extends JDialog {
         JLabel lblTotal = new JLabel(String.format("Total a pagar: $%.2f", totalAPagar), SwingConstants.CENTER);
         lblTotal.setFont(new Font("Segoe UI", Font.PLAIN, 16));
         lblTotal.setAlignmentX(Component.CENTER_ALIGNMENT);
-
-        // --- Opciones de pago (simples por ahora) ---
+        
         JPanel panelOpciones = new JPanel(new FlowLayout(FlowLayout.CENTER));
         JRadioButton radioTarjeta = new JRadioButton("Tarjeta de Crédito", true);
         JRadioButton radioPSE = new JRadioButton("PSE");
@@ -48,7 +47,6 @@ public class PagoDialog extends JDialog {
         panelOpciones.add(radioTarjeta);
         panelOpciones.add(radioPSE);
 
-        // --- Botones de acción ---
         JPanel panelBotones = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 5));
         JButton btnPagar = new JButton("Pagar");
         btnPagar.setBackground(new Color(40, 167, 69));
@@ -61,7 +59,6 @@ public class PagoDialog extends JDialog {
         panelBotones.add(btnCancelar);
         panelBotones.add(btnPagar);
         
-        // --- Ensamblado ---
         panelPrincipal.add(lblTitulo);
         panelPrincipal.add(Box.createRigidArea(new Dimension(0, 15)));
         panelPrincipal.add(lblTotal);
@@ -72,13 +69,11 @@ public class PagoDialog extends JDialog {
         
         add(panelPrincipal, BorderLayout.CENTER);
 
-        // --- Lógica de los botones ---
         btnPagar.addActionListener(e -> procesarPagoSimulado());
         btnCancelar.addActionListener(e -> dispose());
     }
 
     private void procesarPagoSimulado() {
-        System.out.println("Procesando pago simulado por un total de: $" + totalAPagar);
 
         boolean exito = controladorReservas.procesarReserva(coordenadasSeleccionadas);
         

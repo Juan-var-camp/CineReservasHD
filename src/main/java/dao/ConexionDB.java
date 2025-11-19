@@ -14,7 +14,6 @@ public class ConexionDB {
         try {
             if (connection == null || connection.isClosed()) {
                 connection = DriverManager.getConnection(URL);
-                System.out.println("Conexión establecida con SQLite");
             }
         } catch (SQLException e) {
             System.err.println("Error al conectar a la base de datos: " + e.getMessage());
@@ -26,7 +25,6 @@ public class ConexionDB {
         try {
             if (connection != null && !connection.isClosed()) {
                 connection.close();
-                System.out.println("Conexión cerrada");
             }
         } catch (SQLException e) {
             System.err.println("Error al cerrar la conexión: " + e.getMessage());
@@ -55,8 +53,7 @@ public class ConexionDB {
                     nombre TEXT NOT NULL UNIQUE,
                     filas INTEGER NOT NULL,
                     columnas INTEGER NOT NULL,
-                    sillas_activas TEXT,
-                    sillas_ocupadas TEXT       
+                    sillas_activas TEXT      
                 );
             """;
 
@@ -68,6 +65,7 @@ public class ConexionDB {
                     fecha TEXT,
                     hora TEXT,
                     precio REAL,
+                    sillas_ocupadas TEXT,
                     FOREIGN KEY (id_pelicula) REFERENCES peliculas(id),
                     FOREIGN KEY (id_sala) REFERENCES salas(id)
                 );
@@ -101,8 +99,6 @@ public class ConexionDB {
             stmt.execute(sqlFuncion);
             stmt.execute(sqlUsuario);
             stmt.execute(sqlReserva);
-
-            System.out.println("Base de datos inicializada correctamente.");
 
         } catch (SQLException e) {
             System.err.println("Error al inicializar la base de datos: " + e.getMessage());

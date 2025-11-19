@@ -13,7 +13,7 @@ public class ConfiguracionSalaPanel extends JPanel {
     private final int MAX_FILAS = 30;
     private final int MAX_COLUMNAS = 30;
     
-    private static final Color COLOR_DISPONIBLE = new Color(220, 220, 220);//Gris
+    private static final Color COLOR_DISPONIBLE = new Color(220, 220, 220);
     private static final Color COLOR_OCUPADA = new Color(255, 90, 90);
     private static final Color COLOR_HOVER = new Color(180, 180, 255);
 
@@ -37,7 +37,6 @@ public class ConfiguracionSalaPanel extends JPanel {
     }
 
     private void inicializarComponentes() {
-        // --- Panel superior ---
         JPanel panelTop = new JPanel(new FlowLayout(FlowLayout.LEFT));
 
         comboSalas = new JComboBox<>();
@@ -60,7 +59,6 @@ public class ConfiguracionSalaPanel extends JPanel {
 
         add(panelTop, BorderLayout.NORTH);
 
-        // --- Panel central ---
         panelSillas = new JPanel();
         panelSillas.setLayout(new GridLayout(10, 10, 3, 3));
         botonesSillas = new JButton[MAX_FILAS][MAX_COLUMNAS];
@@ -69,7 +67,6 @@ public class ConfiguracionSalaPanel extends JPanel {
         JScrollPane scroll = new JScrollPane(panelSillas);
         add(scroll, BorderLayout.CENTER);
 
-        // --- Panel inferior ---
         JPanel panelBottom = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         btnGuardar = new JButton("Guardar");
         btnLimpiar = new JButton("Limpiar");
@@ -80,7 +77,6 @@ public class ConfiguracionSalaPanel extends JPanel {
         panelBottom.add(btnGuardar);
         add(panelBottom, BorderLayout.SOUTH);
 
-        // --- Listeners ---
         btnGenerar.addActionListener(e -> {
             int filas = (int) spinnerFilas.getValue();
             int columnas = (int) spinnerColumnas.getValue();
@@ -101,7 +97,6 @@ public class ConfiguracionSalaPanel extends JPanel {
         });
     }
 
-    // --- Genera los botones de sillas ---
     private void generarSillas(int filas, int columnas) {
         panelSillas.removeAll();
         panelSillas.setLayout(new GridLayout(filas, columnas, 3, 3));

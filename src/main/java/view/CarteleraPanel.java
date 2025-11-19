@@ -18,7 +18,7 @@ public class CarteleraPanel extends JPanel {
         panelHeader.setBackground(new Color(25, 25, 112)); 
         panelHeader.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
         
-        JLabel labelTitulo = new JLabel("Cartelera de CineReservasHD");
+        JLabel labelTitulo = new JLabel("Cartelera de CineReservasUltradHD100%realNoFake(CineReservasHD)");
         labelTitulo.setFont(new Font("Segoe UI", Font.BOLD, 28));
         labelTitulo.setForeground(Color.WHITE);
         
@@ -36,11 +36,10 @@ public class CarteleraPanel extends JPanel {
         btnCerrarSesion.setForeground(Color.WHITE);
         
         JPanel panelBotones = new JPanel(new FlowLayout(FlowLayout.RIGHT, 15, 0));
-        panelBotones.setOpaque(false); // Hacerlo transparente
+        panelBotones.setOpaque(false); 
         panelBotones.add(btnHistorial);
         panelBotones.add(btnCerrarSesion);
         
-        // 3. Añadir funcionalidad a los botones
         btnHistorial.addActionListener(e -> {
             MainFrame.getInstancia().mostrarHistorial();
         });

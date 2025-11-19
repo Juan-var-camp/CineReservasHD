@@ -1,28 +1,32 @@
 package controladores;
 
 import model.Reserva;
-import java.awt.Point; 
+import java.awt.Point;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Set;
+import model.Funcion;
+import model.Sala;
 
 public class ControladorSeleccionSillas {
 
     private final ControladorSala controladorSala;
     private final ControladorReserva controladorReserva;
-    private ControladorUsuario controladorUsuario;
+    private final ControladorUsuario controladorUsuario;
+    private final ControladorFuncion controladorFuncion;
         
-    private final int idFuncion;  //Esto puede quitarse despues de agregar el 
-    private final double precioFuncion;
+    private final Funcion funcionActual;
+    private final Sala salaActual;
 
-    public ControladorSeleccionSillas(String nombreSala, int idFuncion, double precioFuncion) {
+    public ControladorSeleccionSillas(Funcion funcion) {
+        
         this.controladorSala = ControladorSala.getInstanciaControladorSala();
         this.controladorReserva = ControladorReserva.getInstanciaControladorReserva();
         this.controladorUsuario = ControladorUsuario.getInstanciaControladorUsuario();
-        this.idFuncion = idFuncion;
-        this.precioFuncion = precioFuncion;
+        this.controladorFuncion = ControladorFuncion.getInstancia();
         
-        controladorSala.cargarSala(nombreSala);
+        this.funcionActual = funcion;
+        this.salaActual = controladorSala.cargarSala(funcion.getIdSala());
     }
     
     public boolean procesarReserva(Set<Point> coordenadasSeleccionadas) {
@@ -31,20 +35,19 @@ public class ControladorSeleccionSillas {
         }
 
         try {
-            double total = coordenadasSeleccionadas.size() * this.precioFuncion;
+            double total = coordenadasSeleccionadas.size() * funcionActual.getPrecio();
             String fecha = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
             int idUsuario = controladorUsuario.getUsuarioActual().getId();
-            Reserva nuevaReserva = new Reserva(idFuncion, idUsuario, coordenadasSeleccionadas.size(), total, fecha);
+            Reserva nuevaReserva = new Reserva(funcionActual.getId(), idUsuario, coordenadasSeleccionadas.size(), total, fecha);
 
             if (!controladorReserva.guardarReserva(nuevaReserva)) {
                 return false; 
             }
 
-            // CAMBIO: El método de actualización también recibe las coordenadas
             actualizarEstadoSillasOcupadas(coordenadasSeleccionadas);
-            controladorSala.guardarSala(controladorSala.getSalaActual());
+            controladorFuncion.guardarEstadoSillas(funcionActual);
             
-            return true; // Éxito
+            return true; 
 
         } catch (Exception e) {
             System.err.println("Error procesando la reserva: " + e.getMessage());
@@ -54,7 +57,7 @@ public class ControladorSeleccionSillas {
     }
     
     private void actualizarEstadoSillasOcupadas(Set<Point> coordenadas) {
-        boolean[][] ocupadas = controladorSala.getSalaActual().getSillasOcupadas();
+        boolean[][] ocupadas = funcionActual.getSillasOcupadas();
         for (Point p : coordenadas) {
             int fila = p.x; // Asumiendo que guardamos (fila, columna)
             int columna = p.y;
@@ -70,14 +73,18 @@ public class ControladorSeleccionSillas {
         return controladorSala;
     }
 
+    public Sala getSalaActual(){
+        return this.salaActual;
+    }
+
     public int getIdFuncion() {
-        return idFuncion;
+        return funcionActual.getId();
     }
 
     public ControladorUsuario getControladorUsuario() {
         return controladorUsuario;
     }
-    
+
     public ControladorReserva getControladorReserva() {
         return controladorReserva;
     }

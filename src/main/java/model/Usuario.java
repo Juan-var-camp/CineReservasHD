@@ -16,43 +16,23 @@ public class Usuario {
         this.nombre = nombre;
     }
 
-    public String getUsername() {
-        return username;
-    }
+    public String getUsername() { return username;    }
 
-    public String getPassword() {
-        return password;
-    }
+    public String getPassword() { return password;    }
 
-    public String getNombre() {
-        return nombre;
-    }
+    public String getNombre() { return nombre;    }
 
-    public void setUsername(String username) {
-        this.username = username;
-    }
+    public void setUsername(String username) { this.username = username;    }
 
-    public void setPassword(String password) {
-        this.password = password;
-    }
+    public void setPassword(String password) { this.password = password;    }
 
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
-    }
+    public void setNombre(String nombre) { this.nombre = nombre;    }
 
-    public String getTipo() {
-        return tipo;
-    }
+    public String getTipo() { return tipo;    }
 
-    public void setTipo(String tipo) {
-        this.tipo = tipo;
-    }
+    public void setTipo(String tipo) { this.tipo = tipo;    }
 
-    public void setId(int id) {
-        this.id = id;
-    }
+    public void setId(int id) { this.id = id;    }
 
-    public int getId() {
-        return id;
-    }
+    public int getId() { return id;    }
 }

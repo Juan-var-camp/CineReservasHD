@@ -18,8 +18,8 @@ public class UIUtils {
                 new EmptyBorder(5, 10, 5, 10)
         ));
 
-        // Placeholder funcional
         campo.addFocusListener(new java.awt.event.FocusAdapter() {
+            @Override
             public void focusGained(java.awt.event.FocusEvent e) {
                 if (campo.getText().equals(placeholder)) {
                     campo.setText("");
@@ -27,6 +27,7 @@ public class UIUtils {
                 }
             }
 
+            @Override
             public void focusLost(java.awt.event.FocusEvent e) {
                 if (campo.getText().isEmpty()) {
                     campo.setText(placeholder);
@@ -44,7 +45,6 @@ public class UIUtils {
         boton.setBorder(BorderFactory.createEmptyBorder(8, 16, 8, 16));
         boton.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
-        // Hover efecto
         boton.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
             public void mouseEntered(java.awt.event.MouseEvent e) {

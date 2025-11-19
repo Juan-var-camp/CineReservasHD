@@ -1,4 +1,3 @@
-// --- START OF FILE view/HistorialReservasPanel.java ---
 package view;
 
 import controladores.ControladorReserva;
@@ -28,17 +27,15 @@ public class HistorialReservasPanel extends JPanel {
         setBorder(new EmptyBorder(15, 20, 15, 20));
         setBackground(new Color(240, 248, 255));
 
-        // --- Título ---
         JLabel lblTitulo = new JLabel("Mi Historial de Reservas", SwingConstants.CENTER);
         lblTitulo.setFont(new Font("Segoe UI", Font.BOLD, 24));
         add(lblTitulo, BorderLayout.NORTH);
 
-        // --- Tabla ---
         String[] columnas = {"Película", "Fecha Función", "Hora", "Sala", "Asientos", "Total Pagado", "Fecha de Reserva"};
         modeloTabla = new DefaultTableModel(columnas, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
-                return false; // Hacer que la tabla no sea editable
+                return false; 
             }
         };
         tablaHistorial = new JTable(modeloTabla);
@@ -49,7 +46,6 @@ public class HistorialReservasPanel extends JPanel {
         JScrollPane scrollPane = new JScrollPane(tablaHistorial);
         add(scrollPane, BorderLayout.CENTER);
 
-        // --- Botón de Volver ---
         JButton btnVolver = new JButton("Volver a la Cartelera");
         btnVolver.setFont(new Font("Segoe UI", Font.BOLD, 14));
         btnVolver.addActionListener(e -> MainFrame.getInstancia().cambiarVista("cartelera"));
@@ -61,7 +57,6 @@ public class HistorialReservasPanel extends JPanel {
     }
 
     public void cargarHistorial() {
-        // Limpiar tabla antes de cargar nuevos datos
         modeloTabla.setRowCount(0);
 
         Usuario usuarioActual = ControladorUsuario.getInstanciaControladorUsuario().getUsuarioActual();
@@ -73,7 +68,6 @@ public class HistorialReservasPanel extends JPanel {
         List<HistorialReserva> historial = controladorReserva.obtenerHistorialPorUsuario(usuarioActual.getId());
 
         if (historial.isEmpty()) {
-             // Opcional: mostrar un mensaje en la tabla si no hay reservas
              modeloTabla.addRow(new Object[]{"No tienes reservas aún.", "", "", "", "", "", ""});
         } else {
             for (HistorialReserva r : historial) {

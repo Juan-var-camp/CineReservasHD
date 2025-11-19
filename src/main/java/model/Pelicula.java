@@ -4,13 +4,12 @@ public class Pelicula {
     private int id;
     private String titulo;
     private String genero;
-    private int duracion; // en minutos
+    private int duracion; 
     private String clasificacion;
     private String sipnosis;
-    private String imagenPath; // Nueva propiedad para la imagen
+    private String imagenPath; 
     private double puntaje;
     
-    // Constructor completo
     public Pelicula(int id, String titulo, String genero, int duracion, String clasificacion, String sipnosis, String imagenPath, double puntaje) {
         this.id = id;
         this.titulo = titulo;
@@ -22,12 +21,10 @@ public class Pelicula {
         this.puntaje = puntaje;
     }
 
-    // Constructor sin ID
     public Pelicula(String titulo, String genero, int duracion, String clasificacion, String sipnosis, String imagenPath, double puntaje) {
         this(0, titulo, genero, duracion, clasificacion, sipnosis, imagenPath, puntaje);
     }
 
-    // Constructor simplificado para compatibilidad (puedes eliminarlo luego)
     public Pelicula(int id, String titulo, String genero, int duracion) {
         this(id, titulo, genero, duracion, "", "", null, 0);
     }
@@ -36,11 +33,6 @@ public class Pelicula {
         this(0, titulo, genero, duracion, "", "", null, 0);
     }
 
-    
-
-    
-
-    // Getters y Setters
     public int getId() { return id; }
     public String getTitulo() { return titulo; }
     public String getGenero() { return genero; }

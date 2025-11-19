@@ -27,11 +27,11 @@ public class GeneradorReportePDF {
         Font fontHeader = new Font(Font.FontFamily.HELVETICA, 10, Font.BOLD);
         Font fontBody = new Font(Font.FontFamily.HELVETICA, 9, Font.NORMAL);
 
-        document.add(new Paragraph("Reporte de Reservas - CineReservasHD", fontTitulo));
+        document.add(new Paragraph("Reporte de Reservas - CineReservasUltradHD100%realNoFake(CineReservasHD)", fontTitulo));
         document.add(new Paragraph("Periodo: " + fechaInicio + " al " + fechaFin, fontBody));
-        document.add(new Paragraph(" ")); // Salto de línea
+        document.add(new Paragraph(" "));
 
-        PdfPTable table = new PdfPTable(8); // 8 columnas
+        PdfPTable table = new PdfPTable(8); 
         table.setWidthPercentage(100);
         
         String[] headers = {"Usuario", "Película", "Sala", "Fecha Función", "Hora", "Asientos", "Total", "Fecha Reserva"};

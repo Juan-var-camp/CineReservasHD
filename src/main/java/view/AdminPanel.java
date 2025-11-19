@@ -44,10 +44,9 @@ public class AdminPanel extends JPanel {
         
         add(tabbedPane, BorderLayout.CENTER);
 
-        // --- Panel Inferior con Botón de Cerrar Sesión ---
         JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         JButton btnCerrarSesion = new JButton("Cerrar Sesión");
-        btnCerrarSesion.setBackground(new Color(220, 53, 69)); // Rojo
+        btnCerrarSesion.setBackground(new Color(220, 53, 69)); 
         btnCerrarSesion.setForeground(Color.WHITE);
         btnCerrarSesion.setFont(new Font("Segoe UI", Font.BOLD, 14));
         btnCerrarSesion.addActionListener(e -> {
@@ -74,11 +73,11 @@ public class AdminPanel extends JPanel {
     
     private void recargarPanelSeleccionado(int index) {
         switch (index) {
-            case 0 -> // Películas
+            case 0 -> 
                 panelPeliculas.cargarPeliculas();
-            case 1 -> // Funciones
+            case 1 -> 
                 crearFuncionPanel.cargarDatosIniciales();
-            case 2 -> // Salas
+            case 2 -> 
                 configuracionSalaPanel.cargarSalasEnCombo();
         }
     }

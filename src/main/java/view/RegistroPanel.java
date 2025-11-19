@@ -44,7 +44,6 @@ public class RegistroPanel extends JPanel {
         labelTitulo.setForeground(new Color(30, 60, 100));
         labelTitulo.setBorder(new EmptyBorder(0, 0, 15, 0));
 
-        // Campos
         fieldNombre = new JTextField();
         UIUtils.estilizarCampo(fieldNombre, "Nombre completo");
 
@@ -57,14 +56,12 @@ public class RegistroPanel extends JPanel {
         fieldConfirmar = new JPasswordField();
         UIUtils.estilizarCampo(fieldConfirmar, "Confirmar contraseña");
 
-        // Botones
         btnRegistrar = new JButton("Registrar");
         UIUtils.estilizarBoton(btnRegistrar, new Color(0, 120, 215), Color.WHITE);
 
         btnVolver = new JButton("Volver");
         UIUtils.estilizarBoton(btnVolver, new Color(230, 230, 230), Color.BLACK);
 
-        // Añadir componentes
         panel.add(labelTitulo);
         panel.add(fieldNombre);
         panel.add(Box.createRigidArea(new Dimension(0, 10)));
@@ -86,7 +83,6 @@ public class RegistroPanel extends JPanel {
         gbc.gridy = 0;
         add(panel, gbc);
 
-        // Eventos
         btnRegistrar.addActionListener(e -> registrarUsuario());
         btnVolver.addActionListener(e -> volverALogin());
     }

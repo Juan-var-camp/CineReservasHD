@@ -12,7 +12,7 @@ public class GeneradorReporteTXT {
     public static void generar(List<ReporteReserva> datos, File archivo, String fechaInicio, String fechaFin) throws IOException {
         try (PrintWriter writer = new PrintWriter(new FileWriter(archivo))) {
             writer.println("===================================================");
-            writer.println("      REPORTE DE RESERVAS - CINERESERVASHD");
+            writer.println("      REPORTE DE RESERVAS - CineReservasUltradHD100%realNoFake(CineReservasHD)");
             writer.println("===================================================");
             writer.println(" Periodo: " + fechaInicio + " al " + fechaFin);
             writer.println();

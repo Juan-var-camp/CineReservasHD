@@ -9,7 +9,6 @@ public class PagoPSE extends Pago {
     }
     
     public boolean procesarPago(){
-        //Simular pago con PSE
         System.out.println("Procesando pago por PSE con el banco: " + this.banco);
         return true;
     }

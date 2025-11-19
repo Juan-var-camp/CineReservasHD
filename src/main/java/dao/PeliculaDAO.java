@@ -67,7 +67,6 @@ public class PeliculaDAO {
     }
 
     public void actualizar(Pelicula p) throws SQLException {
-        // CORRECCIÓN: Se añadió 'puntaje = ?' a la consulta
         String sql = "UPDATE peliculas SET titulo=?, genero=?, duracion=?, clasificacion=?, sipnosis=?, imagen_path=?, puntaje=? WHERE id=?";
         try (Connection conn = ConexionDB.conectar();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -92,7 +91,6 @@ public class PeliculaDAO {
         }
     }
 
-    // Método adicional para buscar película por ID
     public Pelicula buscarPorId(int id) throws SQLException {
         String sql = "SELECT * FROM peliculas WHERE id = ?";
         try (Connection conn = ConexionDB.conectar();

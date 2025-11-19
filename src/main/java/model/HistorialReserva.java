@@ -22,7 +22,6 @@ public class HistorialReserva {
         this.fechaDeReserva = fechaDeReserva;
     }
 
-    // --- Getters ---
     public String getPeliculaTitulo() { return peliculaTitulo; }
     public String getSalaNombre() { return salaNombre; }
     public String getFuncionFecha() { return funcionFecha; }

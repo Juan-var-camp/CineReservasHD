@@ -50,4 +50,14 @@ public class ControladorFuncion {
             return "Error de base de datos: " + e.getMessage();
         }
     }
+    
+    public boolean guardarEstadoSillas(Funcion funcion) {
+        try {
+            return funcionDAO.actualizarSillasOcupadas(funcion);
+        } catch (SQLException e) {
+            System.err.println("Error al guardar el estado de las sillas: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
 }

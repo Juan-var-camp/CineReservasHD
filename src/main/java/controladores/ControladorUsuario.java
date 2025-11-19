@@ -27,7 +27,6 @@ public class ControladorUsuario {
     
     public void cerrarSesion() {
         this.usuarioActual = null;
-        System.out.println("Sesión cerrada.");
     }
     
     public boolean registrarUsuario(Usuario usuario) {
@@ -36,7 +35,6 @@ public class ControladorUsuario {
 
     public Usuario iniciarSesion(String username, String password) {
         usuarioActual = usuarioDAO.login(username, password);
-        System.out.println(usuarioActual);
         return usuarioActual;
     }
 }

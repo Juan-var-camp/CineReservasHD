@@ -11,7 +11,6 @@ public class PagoTarjeta extends Pago{
     }
     
     public boolean procesarPago(){
-        ///simular validacion
         System.out.println("Procesando pago con tarjeta de " + titular);
         return true;
     }

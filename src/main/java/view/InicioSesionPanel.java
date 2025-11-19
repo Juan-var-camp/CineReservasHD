@@ -22,12 +22,11 @@ public class InicioSesionPanel extends JPanel {
 
     private void initComponents() {
         setLayout(new GridBagLayout());
-        setBackground(new Color(240, 248, 255)); // Azul claro
+        setBackground(new Color(240, 248, 255)); 
 
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(10, 10, 10, 10);
 
-        // --- Panel principal ---
         JPanel panel = new JPanel();
         panel.setBackground(Color.WHITE);
         panel.setBorder(BorderFactory.createCompoundBorder(
@@ -36,8 +35,7 @@ public class InicioSesionPanel extends JPanel {
         ));
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 
-        // --- Etiqueta de bienvenida ---
-        JLabel labelBienvenida = new JLabel("Bienvenido a CineReservasHD");
+        JLabel labelBienvenida = new JLabel("Bienvenido a CineReservasUltradHD100%realNoFake(CineReservasHD)");
         labelBienvenida.setAlignmentX(Component.CENTER_ALIGNMENT);
         labelBienvenida.setFont(new Font("Segoe UI", Font.BOLD, 18));
         labelBienvenida.setForeground(new Color(30, 60, 100));

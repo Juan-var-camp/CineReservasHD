@@ -16,7 +16,7 @@ public class MainFrame extends JFrame {
     private HistorialReservasPanel historialPanel;
 
     private MainFrame() {
-        setTitle("CineReservasHD");
+        setTitle("CineReservasUltradHD100%realNoFake(CineReservasHD)");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setExtendedState(JFrame.MAXIMIZED_BOTH);
         setLocationRelativeTo(null);
@@ -40,7 +40,6 @@ public class MainFrame extends JFrame {
     private void inicializarVistas() {
         ConexionDB.inicializarDatabase();
 
-        // Paneles que se cargarán una vez
         InicioSesionPanel loginPanel = new InicioSesionPanel();
         RegistroPanel registroPanel = new RegistroPanel();
         CarteleraPanel carteleraPanel = new CarteleraPanel();
@@ -50,7 +49,6 @@ public class MainFrame extends JFrame {
         
         
         
-        // Añadir paneles al contenedor
         panelContenedor.add(historialPanel, "historial");
         panelContenedor.add(loginPanel, "login");
         panelContenedor.add(registroPanel, "registro"); 
@@ -58,7 +56,6 @@ public class MainFrame extends JFrame {
         
         panelContenedor.add(adminPanel, "admin_panel");
         
-        // Guardar referencia en el mapa
         vistas.put("historial", historialPanel);
         vistas.put("login", loginPanel);
         vistas.put("registro", registroPanel);
@@ -72,11 +69,7 @@ public class MainFrame extends JFrame {
             panelContenedor.remove(vistas.get("seleccion"));
         }
         
-        SeleccionSillasPanel seleccionSillas = new SeleccionSillasPanel(
-            funcion.getNombreSala(),
-            funcion.getId(),
-            funcion.getPrecio()
-        );
+        SeleccionSillasPanel seleccionSillas = new SeleccionSillasPanel(funcion);
         
         vistas.put("seleccion", seleccionSillas);
         panelContenedor.add(seleccionSillas, "seleccion");
@@ -86,7 +79,6 @@ public class MainFrame extends JFrame {
 
     public void cambiarVista(String nombreVista) {
         if ("cartelera".equals(nombreVista)) {
-            // Asegurarse de que la vista exista y sea del tipo correcto
             Component vista = vistas.get(nombreVista);
             if (vista instanceof CarteleraPanel carteleraPanel) {
                 carteleraPanel.cargarPeliculas();
