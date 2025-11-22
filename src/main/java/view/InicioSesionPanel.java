@@ -8,6 +8,7 @@ import java.util.List;
 import controladores.ControladorUsuario;
 import model.Usuario;
 import util.UIUtils;
+import java.io.File;
 
 public class InicioSesionPanel extends JPanel {
 
@@ -34,6 +35,24 @@ public class InicioSesionPanel extends JPanel {
                 new EmptyBorder(30, 40, 30, 40)
         ));
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        
+        JLabel labelLogo = new JLabel();
+        labelLogo.setAlignmentX(Component.CENTER_ALIGNMENT);
+        
+        String rutaImagen = "images/logo.jpg"; 
+        File archivoImg = new File(rutaImagen);
+        
+        if (archivoImg.exists()) {
+            ImageIcon iconoOriginal = new ImageIcon(rutaImagen);
+            Image imagenEscalada = iconoOriginal.getImage().getScaledInstance(150, 200, Image.SCALE_SMOOTH);
+            labelLogo.setIcon(new ImageIcon(imagenEscalada));
+        } else {
+            
+            labelLogo.setText("[Logo Aquí]");
+        }
+        labelLogo.setBorder(new EmptyBorder(0, 0, 20, 0)); 
+        
+        panel.add(labelLogo);
 
         JLabel labelBienvenida = new JLabel("Bienvenido a CineReservasUltradHD100%realNoFake(CineReservasHD)");
         labelBienvenida.setAlignmentX(Component.CENTER_ALIGNMENT);
